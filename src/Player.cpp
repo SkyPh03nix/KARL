@@ -1,42 +1,16 @@
-#include "Entity.h"
-#include <string>
-#include <iostream>
+#pragma once
 
-
-// --------------------------- ENTITY ---------------------------- //
-
-Entity::Entity(sf::Vector2f size, sf::Vector2f pos, sf::Color fill) {
-    shape.setSize(size);
-    shape.setPosition(pos);
-    shape.setFillColor(fill);
-}
-
-void Entity::draw(sf::RenderWindow& window) const {
-    window.draw(shape);
-}
-
-sf::Vector2f Entity::getPosition() const {
-    return shape.getPosition();
-}
-
-sf::Vector2f Entity::getSize() const {
-    return shape.getSize();
-}
-
-
-// --------------------------- PLAYER ---------------------------- //
+#include "Player.h"
 
 Player::Player(sf::Vector2f size, sf::Vector2f pos, float speed, const std::string& name, sf::Color fill)
     : Entity(size, pos, fill), speed(speed), name(name) {
-        if (!font.loadFromFile("arial.ttf")) {
+        if (!font.loadFromFile("assets/arial.ttf")) {
             std::cerr << "Fehler: Schriftart konnte nicht geladen werden!" << std::endl;
         }
     nameText.setFont(font);
     nameText.setCharacterSize(15);
     nameText.setFillColor(sf::Color::White);
     nameText.setString(name);
-
-    sf::Vector2f posText = shape.getPosition();
 
     sf::FloatRect textBounds = nameText.getLocalBounds();
     nameText.setOrigin(textBounds.width / 2.f, textBounds.height / 2.f);
@@ -96,25 +70,4 @@ void Player::setColor(sf::Color col) {
 
 sf::FloatRect Player::getGlobalBounds() const {
     return shape.getGlobalBounds();
-}
-
-// --------------------------- BUTTON ---------------------------- //
-
-Button::Button(sf::Vector2f size, sf::Vector2f pos, sf::Color fill) 
-    : Entity(size,pos, fill), active(false){
-}
-
-void Button::update(Player& player) {
-    if (shape.getGlobalBounds().intersects(player.getGlobalBounds())) {
-        active = true;
-        player.setColor(sf::Color::Magenta);
-    } else {
-        active = false;
-        player.setColor(sf::Color::Blue);
-
-    }
-}
-
-bool Button::isActive() const {
-    return active;
 }

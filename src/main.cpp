@@ -1,4 +1,6 @@
 #include "Entity.h"
+#include "Player.h"
+#include "Button.h"
 
 int main() {
     sf::VideoMode mode = sf::VideoMode::getDesktopMode();
