@@ -1,9 +1,4 @@
 #include "Entity.h"
-#include <string>
-#include <iostream>
-
-
-// --------------------------- ENTITY ---------------------------- //
 
 Entity::Entity(sf::Vector2f size, sf::Vector2f pos, sf::Color fill) {
     shape.setSize(size);

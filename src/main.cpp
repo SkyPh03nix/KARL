@@ -33,7 +33,8 @@ int main() {
 
     colorChangeButton.draw(window);
     karl.draw(window);
-
+    
+    //std::cout << "RAM approx: " << (float)(getMemoryUsageInMB()) << " MB\n";
     window.display();
     }
     return 0;
