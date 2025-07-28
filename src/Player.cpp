@@ -1,11 +1,11 @@
-#pragma once
-
 #include "Player.h"
+#include <iostream>
 
 Player::Player(sf::Vector2f size, sf::Vector2f pos, float speed, const std::string& name, sf::Color fill)
     : Entity(size, pos, fill), speed(speed), name(name) {
         if (!font.loadFromFile("assets/arial.ttf")) {
             std::cerr << "Fehler: Schriftart konnte nicht geladen werden!" << std::endl;
+            exit(1);
         }
     nameText.setFont(font);
     nameText.setCharacterSize(15);
@@ -49,10 +49,18 @@ void Player::update(float deltaTime, sf::Vector2u windowSize) {
 
     // checking for wall collision and negating the movement 
     sf::FloatRect bounds = shape.getGlobalBounds();
-    if (bounds.left < 0) {shape.setPosition(0,bounds.top);}
-    if (bounds.left + bounds.width > windowSize.x) {shape.setPosition(windowSize.x-bounds.width,bounds.top);}
-    if (bounds.top < 0) {shape.setPosition(bounds.left, 0);}
-    if (bounds.top + bounds.height > windowSize.y) {shape.setPosition(bounds.left, windowSize.y - bounds.height);}
+
+    // border is wall
+    //if (bounds.left < 0) {shape.setPosition(0,bounds.top);}
+    //if (bounds.left + bounds.width > windowSize.x) {shape.setPosition(windowSize.x-bounds.width,bounds.top);}
+    //if (bounds.top < 0) {shape.setPosition(bounds.left, 0);}
+    //if (bounds.top + bounds.height > windowSize.y) {shape.setPosition(bounds.left, windowSize.y - bounds.height);}
+
+    //border teleports to other side  
+    if (bounds.left < 0) {shape.setPosition(windowSize.x-bounds.width ,bounds.top);} //left 
+    if (bounds.left + bounds.width > windowSize.x) {shape.setPosition(0,bounds.top);} //right
+    if (bounds.top < 0) {shape.setPosition(bounds.left, windowSize.y - bounds.height);} //top
+    if (bounds.top + bounds.height > windowSize.y) {shape.setPosition(bounds.left, 0);} //bottom
 
     updateNameTextPosition();
 }
