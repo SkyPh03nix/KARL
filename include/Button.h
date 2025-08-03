@@ -1,14 +1,27 @@
 #pragma once
 
-#include "Entity.h"
+#include "GameObject.h"
+#include <functional>
 
-class Button : public Entity {
+class Button : public GameObject {
     private:
-        bool active;
-    public:
-        Button(sf::Vector2f size, sf::Vector2f pos, sf::Color fill = sf::Color::Blue);
+        sf::RectangleShape shape;
+        sf::Text text;
+        sf::Font font;
+        std::function<void()> onClick;
+        bool wasClickedLastFrame = false;
 
-        void update(Player& player);
-        void update(float deltaTime) override{};
-        bool isActive() const;
+        bool isMouseOver(const sf::RenderWindow& window) const;
+
+    public:
+        Button(sf::Vector2f size, sf::Vector2f pos, const std::string& label = "");
+
+        void setOnClick(std::function<void()> callback);
+        void setColor(sf::Color col);
+
+        void updateTextColor();
+
+        //void update(const sf::RenderWindow& window) override;
+        void update(float deltaTime, const sf::RenderWindow& window) override;
+        void draw(sf::RenderWindow& window) override;
 };

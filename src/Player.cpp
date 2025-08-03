@@ -1,45 +1,40 @@
 #include "Player.h"
 #include <iostream>
+#include "GameObject.h"
+#include "Utils.h"
 
 Player::Player(sf::Vector2f size, sf::Vector2f pos, float speed, const std::string& name, sf::Color fill)
-    : Entity(size, pos, fill), speed(speed), name(name) {
-        if (!font.loadFromFile("assets/arial.ttf")) {
-            std::cerr << "Fehler: Schriftart konnte nicht geladen werden!" << std::endl;
-            exit(1);
-        }
+    : speed(speed), name(name) {
+    shape.setSize(size);
+    shape.setPosition(pos);
+    shape.setFillColor(fill);
+
+    //init nametag
+    if (!font.loadFromFile("assets/arial.ttf")) {
+        std::cerr << "Fehler: Schriftart konnte nicht geladen werden!" << std::endl;
+        exit(1);
+    }
     nameText.setFont(font);
-    nameText.setCharacterSize(15);
-    nameText.setFillColor(sf::Color::White);
+    nameText.setCharacterSize(12);
     nameText.setString(name);
 
     sf::FloatRect textBounds = nameText.getLocalBounds();
-    nameText.setOrigin(textBounds.width / 2.f, textBounds.height / 2.f);
-    nameText.setPosition(
-        shape.getPosition().x + shape.getSize().x / 2.f,
-        shape.getPosition().y + shape.getSize().y / 2.f
-    );
-}
+    sf::Vector2f center = shape.getPosition() + shape.getSize() / 2.f;
+    nameText.setOrigin( textBounds.left + textBounds.width / 2.0f, 
+                        textBounds.top + textBounds.height / 2.0f);
+    nameText.setPosition(center);
 
-
-void Player::update(float deltaTime) {
-    sf::Vector2f movement(0.f, 0.f);
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) movement.y -= speed * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) movement.y += speed * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) movement.x -= speed * deltaTime;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) movement.x += speed * deltaTime;
-    shape.move(movement);
+    nameText.setFillColor(getContrastingTextColor(fill));
 }
 
 void Player::updateNameTextPosition() {
-    sf::FloatRect textBounds = nameText.getLocalBounds();
-    nameText.setOrigin(textBounds.width / 2.f, textBounds.height / 2.f);
-    nameText.setPosition(
-        shape.getPosition().x + shape.getSize().x / 2.f,
-        shape.getPosition().y + shape.getSize().y / 2.f
-    );
+    sf::Vector2f shapeCenter = shape.getPosition() + shape.getSize() / 2.f;
+    nameText.setPosition(shapeCenter);
 }
 
-void Player::update(float deltaTime, sf::Vector2u windowSize) {
+void Player::update(float deltaTime, const sf::RenderWindow& window) {
+    sf::Vector2u windowSize = window.getSize();
+
     sf::Vector2f movement(0.f, 0.f);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) movement.y -= speed * deltaTime;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) movement.y += speed * deltaTime;
@@ -47,33 +42,29 @@ void Player::update(float deltaTime, sf::Vector2u windowSize) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) movement.x += speed * deltaTime;
     shape.move(movement);
 
-    // checking for wall collision and negating the movement 
-    sf::FloatRect bounds = shape.getGlobalBounds();
+    //Check for window border
+    sf::Vector2f pos = shape.getPosition();
+    sf::Vector2f size = shape.getSize();
+    if (pos.x < 0) pos.x = 0;
+    if (pos.y < 0) pos.y = 0;
+    if (pos.x + size.x > windowSize.x) pos.x = windowSize.x - size.x;
+    if (pos.y + size.y > windowSize.y) pos.y = windowSize.y - size.y;
 
-    // border is wall
-    //if (bounds.left < 0) {shape.setPosition(0,bounds.top);}
-    //if (bounds.left + bounds.width > windowSize.x) {shape.setPosition(windowSize.x-bounds.width,bounds.top);}
-    //if (bounds.top < 0) {shape.setPosition(bounds.left, 0);}
-    //if (bounds.top + bounds.height > windowSize.y) {shape.setPosition(bounds.left, windowSize.y - bounds.height);}
-
-    //border teleports to other side  
-    if (bounds.left < 0) {shape.setPosition(windowSize.x-bounds.width ,bounds.top);} //left 
-    if (bounds.left + bounds.width > windowSize.x) {shape.setPosition(0,bounds.top);} //right
-    if (bounds.top < 0) {shape.setPosition(bounds.left, windowSize.y - bounds.height);} //top
-    if (bounds.top + bounds.height > windowSize.y) {shape.setPosition(bounds.left, 0);} //bottom
-
-    updateNameTextPosition();
+    shape.setPosition(pos);
+    //nameText.setPosition(pos.x, pos.y - 20);      // name over Player
+    updateNameTextPosition();                       // name next to Player
 }
 
-void Player::draw(sf::RenderWindow& window) const {
+void Player::draw(sf::RenderWindow& window) {
     window.draw(shape);
     if(!name.empty()) {
         window.draw(nameText);
     }
 }
 
-void Player::setColor(sf::Color col) {
+void Player::setColor(const sf::Color& col) {
     shape.setFillColor(col);
+    nameText.setFillColor(getContrastingTextColor(col));
 }
 
 sf::FloatRect Player::getGlobalBounds() const {

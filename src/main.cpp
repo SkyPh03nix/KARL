@@ -1,8 +1,10 @@
-#include "Entity.h"
 #include "Player.h"
 #include "Button.h"
+#include "Game.h"
+//TODO fix includes
 
 int main() {
+    /*
     sf::VideoMode mode = sf::VideoMode::getDesktopMode();
     sf::RenderWindow window(mode, "test", sf::Style::None);
     sf::Clock clock;
@@ -37,5 +39,10 @@ int main() {
     //std::cout << "RAM approx: " << (float)(getMemoryUsageInMB()) << " MB\n";
     window.display();
     }
+    */
+
+    Game game;
+    game.run();
     return 0;
+
 }

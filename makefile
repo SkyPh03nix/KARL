@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Iinclude -IC:/includes/SFML-2.6.1/include
+CXXFLAGS = -std=c++17 -Wall -Iinclude -IC:/includes/SFML-2.6.1/include
 
 # SFML Bibliothekspfad und Libraries
 LDFLAGS = -LC:/includes/SFML-2.6.1/lib -lsfml-graphics -lsfml-window -lsfml-system

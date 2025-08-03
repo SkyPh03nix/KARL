@@ -1,20 +1,24 @@
 #pragma once
 
-#include "Entity.h"
+#include "GameObject.h"
+#include <SFML/Graphics.hpp>
+#include <string>
 
-class Player : public Entity {
+class Player : public GameObject {
     private:
+        sf::RectangleShape shape;
         float speed;
         std::string name;
-        sf::Font font;
-        sf::Text nameText;
-    public:
-        Player(sf::Vector2f size, sf::Vector2f pos, float speed,const std::string& name = "", sf::Color fill = sf::Color::Green);
 
-        void update(float deltaTime) override;
-        void update(float deltaTime, sf::Vector2u windowSize);
-        void draw(sf::RenderWindow& window) const override;
+        sf::Text nameText;
+        sf::Font font;
+
+    public:
+        Player(sf::Vector2f size, sf::Vector2f pos, float speed, const std::string& name = "", sf::Color fill = sf::Color::Green);
+
+        void update(float deltaTime, const sf::RenderWindow& window) override;
+        void draw(sf::RenderWindow& window) override;
         void updateNameTextPosition();
-        void setColor(sf::Color col);
+        void setColor(const sf::Color& col);
         sf::FloatRect getGlobalBounds() const;
 };
