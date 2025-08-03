@@ -16,7 +16,7 @@ Button::Button(sf::Vector2f size, sf::Vector2f pos, const std::string& label) {
     text.setFont(font);
     text.setString(label);
     //text.setStyle(sf::Text::Bold);
-    text.setCharacterSize(12);
+    text.setCharacterSize(14);
 
     // Position Text
     sf::FloatRect textRect = text.getLocalBounds();

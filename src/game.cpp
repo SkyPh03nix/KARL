@@ -1,16 +1,14 @@
 #include "Game.h"
 #include <iostream>
 
-
 void Game::initObjects() {
     //sf::Vector2u windowSize = window.getSize(); // for window size based placement of objects
-
     //Karl
+    initPlayerTexture();
     auto player = std::make_unique<Player>(
-        sf::Vector2f(50.f,50.f), 
-        sf::Vector2f(window.getSize().x/2.f-25.f, window.getSize().y/2.f-25.f),
-        900.f,
-        "Karl"
+        playerWalkTexture, playerIdleTexture,
+        sf::Vector2f(window.getSize().x/2.f-32.f, window.getSize().y/2.f-32.f),
+        100.f
     );
     
     //Button
@@ -19,7 +17,7 @@ void Game::initObjects() {
     auto button = std::make_unique<Button>(
         buttonSize,
         buttonPos,
-        "Make Red"
+        "Make Red" //TODO fitTextToButton() function
     );
     button->setOnClick([&p = *player](){
         p.setColor(sf::Color::Red);
@@ -42,9 +40,21 @@ void Game::initObjects() {
     gameObjects.push_back(std::move(button2));   
 }
 
+void Game::initPlayerTexture(){
+    if (!playerWalkTexture.loadFromFile("assets/slime/PNG/Slime1/Walk/Slime1_Walk_full.png")) {
+        std::cerr << "Error loading Player texture" <<std::endl;
+        exit(1);
+    }
+    if (!playerIdleTexture.loadFromFile("assets/slime/PNG/Slime1/Idle/Slime1_Idle_full.png")) {
+        std::cerr << "Error loading Player texture" <<std::endl;
+        exit(1);
+    }
+
+}
 
 Game::Game() {
     initWindow();
+    initBackground();
     initObjects();
 }
 
@@ -61,6 +71,22 @@ void Game::initWindow() {
     sf::VideoMode mode = sf::VideoMode::getDesktopMode(); //TODO research desktop and fullscreen modes
     window.create(mode, "Karl", sf::Style::Fullscreen);
     window.setFramerateLimit(60);
+}
+
+void Game::initBackground() {
+    if (!backgroundTexture.loadFromFile("assets/background2.png")) {
+        std::cerr << "Error loading background texture!" <<std::endl;
+        exit(1);
+    }
+    backgroundSprite.setTexture(backgroundTexture);
+
+    sf::Vector2u windowSize = window.getSize();
+    sf::Vector2u textureSize = backgroundTexture.getSize();
+
+    float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
+    float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
+
+    backgroundSprite.setScale(scaleX, scaleY);
 }
 
 
@@ -81,6 +107,7 @@ void Game::update(float deltaTime) {
 
 void Game::render() {
     window.clear();
+    window.draw(backgroundSprite);
 
     for (auto& obj : gameObjects) {
         obj->draw(window);

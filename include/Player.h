@@ -3,22 +3,26 @@
 #include "GameObject.h"
 #include <SFML/Graphics.hpp>
 #include <string>
+#include <AnimationManager.h>
 
 class Player : public GameObject {
     private:
-        sf::RectangleShape shape;
-        float speed;
-        std::string name;
+        sf::Sprite sprite;
+        AnimationManager anims;
 
-        sf::Text nameText;
-        sf::Font font;
+        enum class Direction {Down, Up, Left, Right};
+        Direction direction = Direction::Down;
+        Direction lastDirection = Direction::Down;
+
+        float speed;
+        
+        void initAnimationSet(sf::Texture& texture, const std::string& prefix, int frameCount, float frameTime, int directionsCount = 4);
 
     public:
-        Player(sf::Vector2f size, sf::Vector2f pos, float speed, const std::string& name = "", sf::Color fill = sf::Color::Green);
+        Player(sf::Texture& walkTexture, sf::Texture& idleTexture, sf::Vector2f pos, float speed);
 
         void update(float deltaTime, const sf::RenderWindow& window) override;
         void draw(sf::RenderWindow& window) override;
-        void updateNameTextPosition();
         void setColor(const sf::Color& col);
         sf::FloatRect getGlobalBounds() const;
 };

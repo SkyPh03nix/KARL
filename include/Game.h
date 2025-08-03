@@ -17,6 +17,11 @@ class Game {
         sf::RenderWindow window;
         sf::Clock clock;
 
+        sf::Texture backgroundTexture;
+        sf::Sprite backgroundSprite;
+        sf::Texture playerWalkTexture;
+        sf::Texture playerIdleTexture;
+
         //std::vector<GameObject> gameObjects;
         std::vector<std::unique_ptr<GameObject>> gameObjects;
 
@@ -25,6 +30,8 @@ class Game {
 
         void initWindow();
         void initObjects();
+        void initBackground();
+        void initPlayerTexture();
 
         void processEvents();
         void update(float deltaTime);

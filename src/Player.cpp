@@ -3,33 +3,44 @@
 #include "GameObject.h"
 #include "Utils.h"
 
-Player::Player(sf::Vector2f size, sf::Vector2f pos, float speed, const std::string& name, sf::Color fill)
-    : speed(speed), name(name) {
-    shape.setSize(size);
-    shape.setPosition(pos);
-    shape.setFillColor(fill);
 
-    //init nametag
-    if (!font.loadFromFile("assets/arial.ttf")) {
-        std::cerr << "Fehler: Schriftart konnte nicht geladen werden!" << std::endl;
-        exit(1);
-    }
-    nameText.setFont(font);
-    nameText.setCharacterSize(12);
-    nameText.setString(name);
+Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f pos, float speed)
+    : speed(speed){
 
-    sf::FloatRect textBounds = nameText.getLocalBounds();
-    sf::Vector2f center = shape.getPosition() + shape.getSize() / 2.f;
-    nameText.setOrigin( textBounds.left + textBounds.width / 2.0f, 
-                        textBounds.top + textBounds.height / 2.0f);
-    nameText.setPosition(center);
+    // init animations
+    initAnimationSet(walkTexture, "walk", 8, 0.1f);
+    initAnimationSet(idleTexture, "idle", 6, 0.15f);
 
-    nameText.setFillColor(getContrastingTextColor(fill));
+    // set initial texture and sprite
+    sprite.setTexture(walkTexture);
+    //sprite.setOrigin(64 / 2.f, 64 / 2.f);
+    sprite.setPosition(pos);
+    sprite.setScale(4.f,4.f);
+    
+    anims.play("idle_down");
 }
 
-void Player::updateNameTextPosition() {
-    sf::Vector2f shapeCenter = shape.getPosition() + shape.getSize() / 2.f;
-    nameText.setPosition(shapeCenter);
+void Player::initAnimationSet(sf::Texture& texture, const std::string& prefix, int frameCount, float frameTime, int directionsCount) {
+    texture.setSmooth(false);
+
+    const int frameWidth = 64;
+    const int frameHeight = 64;
+
+    for (int dir = 0; dir < directionsCount; ++dir) {
+        std::vector<sf::IntRect> frames;
+        for (int i = 0; i < frameCount; ++i) {
+            frames.emplace_back(i * frameWidth, dir * frameHeight, frameWidth, frameHeight);
+        }
+        std::string animName = prefix + "_";
+        switch (dir) {
+            case 0: animName += "down"; break;
+            case 1: animName += "up"; break;
+            case 2: animName += "left"; break;
+            case 3: animName += "right"; break;
+            default: animName += "unknown"; break;
+        }
+        anims.addAnimation(animName, texture, frames, frameTime, true);
+    }
 }
 
 void Player::update(float deltaTime, const sf::RenderWindow& window) {
@@ -40,33 +51,56 @@ void Player::update(float deltaTime, const sf::RenderWindow& window) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) movement.y += speed * deltaTime;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) movement.x -= speed * deltaTime;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) movement.x += speed * deltaTime;
-    shape.move(movement);
+    sprite.move(movement);
+
+    if (movement.x != 0.f || movement.y != 0.f) {
+        // Walk Animation
+        if (std::abs(movement.x) > std::abs(movement.y)) {
+            if (movement.x > 0.f) {
+                anims.play("walk_right"); lastDirection = Direction::Right;
+            } else {
+                anims.play("walk_left"); lastDirection = Direction::Left;
+            }
+        } else {
+            if (movement.y > 0.f) {
+                anims.play("walk_down"); lastDirection = Direction::Down;
+            } else {
+                anims.play("walk_up"); lastDirection = Direction::Up;
+            }
+        }
+    } else {
+        // Idle Animation
+        switch (lastDirection) {
+            case Direction::Down:  anims.play("idle_down"); break;
+            case Direction::Left:  anims.play("idle_left"); break;
+            case Direction::Right: anims.play("idle_right"); break;
+            case Direction::Up:    anims.play("idle_up"); break;
+        }
+    }
+
+    //update animation
+    anims.update(deltaTime);
+    anims.applyToSprite(sprite);
 
     //Check for window border
-    sf::Vector2f pos = shape.getPosition();
-    sf::Vector2f size = shape.getSize();
+    sf::Vector2f pos = sprite.getPosition();
+    sf::Vector2f size(sprite.getGlobalBounds().width, sprite.getGlobalBounds().height);
     if (pos.x < 0) pos.x = 0;
     if (pos.y < 0) pos.y = 0;
     if (pos.x + size.x > windowSize.x) pos.x = windowSize.x - size.x;
     if (pos.y + size.y > windowSize.y) pos.y = windowSize.y - size.y;
 
-    shape.setPosition(pos);
-    //nameText.setPosition(pos.x, pos.y - 20);      // name over Player
-    updateNameTextPosition();                       // name next to Player
+    sprite.setPosition(pos);
 }
 
 void Player::draw(sf::RenderWindow& window) {
-    window.draw(shape);
-    if(!name.empty()) {
-        window.draw(nameText);
-    }
+    window.draw(sprite);
 }
 
 void Player::setColor(const sf::Color& col) {
-    shape.setFillColor(col);
-    nameText.setFillColor(getContrastingTextColor(col));
+    sprite.setColor(col);
 }
 
 sf::FloatRect Player::getGlobalBounds() const {
-    return shape.getGlobalBounds();
+    return sprite.getGlobalBounds();
 }
