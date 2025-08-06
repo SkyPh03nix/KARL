@@ -104,3 +104,7 @@ void Player::setColor(const sf::Color& col) {
 sf::FloatRect Player::getGlobalBounds() const {
     return sprite.getGlobalBounds();
 }
+
+void Player::setPosition(const sf::Vector2f& pos) {
+    sprite.setPosition(pos);
+}

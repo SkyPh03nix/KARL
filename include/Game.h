@@ -4,6 +4,7 @@
 #include <GameObject.h>
 #include <vector>
 #include <memory>
+#include "PortalSystem.h"
 //TODO fix includes
 
 class Game {
@@ -20,11 +21,10 @@ class Game {
         sf::Texture playerWalkTexture;
         sf::Texture playerIdleTexture;
 
-        //std::vector<GameObject> gameObjects;
+        PortalSystem portals;
+        
         std::vector<std::unique_ptr<GameObject>> gameObjects;
 
-        //Player player;
-        //std::vector<Button> buttons;
 
         void initWindow();
         void initObjects();

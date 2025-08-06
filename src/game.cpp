@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "Button.h"
 #include <memory>
+#include <iostream>
 
 void Game::initObjects() {
     //sf::Vector2u windowSize = window.getSize(); // for window size based placement of objects
@@ -13,7 +14,6 @@ void Game::initObjects() {
         sf::Vector2f(window.getSize().x/2.f-32.f, window.getSize().y/2.f-32.f),
         250.f
     );
-    
     //Button
     sf::Vector2f buttonSize(100.f,50.f);
     sf::Vector2f buttonPos(100, 100);
@@ -36,7 +36,7 @@ void Game::initObjects() {
     button2->setOnClick([&p = *player](){
         p.setColor(sf::Color::Green);
     });
-
+    
     // !!! only do this at end of function (move destroys the local objects) !!!
     gameObjects.push_back(std::move(player));
     gameObjects.push_back(std::move(button)); 
@@ -90,6 +90,7 @@ void Game::initBackground() {
     float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
 
     backgroundSprite.setScale(scaleX, scaleY);
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
 
@@ -99,6 +100,10 @@ void Game::processEvents() {
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
             window.close();
         }
+        if(event.type == sf::Event::MouseButtonPressed) {
+            sf::Vector2f mouseWorld = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            portals.handleInput(mouseWorld, event.mouseButton.button);
+        }
     }
 }
 
@@ -106,11 +111,23 @@ void Game::update(float deltaTime) {
     for (auto& obj : gameObjects) {
         obj->update(deltaTime, window);
     }
+
+    portals.update(deltaTime);
+
+    for (auto& obj : gameObjects) {
+        Player* player = dynamic_cast<Player*>(obj.get());
+        if (player) {
+            portals.tryTeleport(*player);
+            break;
+        }
+    }
 }
 
 void Game::render() {
     window.clear();
     window.draw(backgroundSprite);
+
+    portals.draw(window);
 
     for (auto& obj : gameObjects) {
         obj->draw(window);
