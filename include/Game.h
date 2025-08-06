@@ -2,8 +2,6 @@
 
 #include <SFML/Graphics.hpp>
 #include <GameObject.h>
-#include "Player.h"
-#include "Button.h"
 #include <vector>
 #include <memory>
 //TODO fix includes

@@ -1,5 +1,9 @@
 #include "AnimationManager.h"
 #include <iostream>
+#include "Animation.h"
+#include <SFML/Graphics.hpp>
+#include <unordered_map>
+#include <string>
 
 void AnimationManager::addAnimation(const std::string& name, sf::Texture& texture, const std::vector<sf::IntRect>& frames, float frameTime, bool loop) {
     std::cout << "Add Animation: " << name << " mit " << frames.size() << " Frames\n";

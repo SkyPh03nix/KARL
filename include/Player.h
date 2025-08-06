@@ -1,8 +1,6 @@
 #pragma once
 
 #include "GameObject.h"
-#include <SFML/Graphics.hpp>
-#include <string>
 #include <AnimationManager.h>
 
 class Player : public GameObject {

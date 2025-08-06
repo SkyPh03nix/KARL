@@ -1,5 +1,6 @@
 #include "Animation.h"
 #include <iostream>
+#include <SFML/Graphics.hpp>
 
 Animation::Animation(const std::vector<sf::IntRect>& frames, float frameTime, bool loop)
     : frames(frames), 

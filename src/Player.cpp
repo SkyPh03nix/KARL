@@ -1,7 +1,7 @@
 #include "Player.h"
-#include <iostream>
 #include "GameObject.h"
 #include "Utils.h"
+#include <AnimationManager.h>
 
 
 Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f pos, float speed)
@@ -13,7 +13,7 @@ Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f p
 
     // set initial texture and sprite
     sprite.setTexture(walkTexture);
-    //sprite.setOrigin(64 / 2.f, 64 / 2.f);
+    //sprite.setOrigin(64 / 2.f, 64 / 2.f); //centers the sprite correctly but puts it in top left corner of 
     sprite.setPosition(pos);
     sprite.setScale(4.f,4.f);
     

@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include <SFML/Graphics.hpp>
 
 sf::Color getContrastingTextColor(const sf::Color& background) {
     float luminance = 0.299f * background.r + 0.587f * background.g + 0.114f * background.b;

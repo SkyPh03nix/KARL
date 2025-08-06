@@ -1,8 +1,8 @@
 #include "Button.h"
-#include "Player.h"
 #include <iostream>
 #include "Utils.h"
-
+#include "GameObject.h"
+#include <functional>
 
 Button::Button(sf::Vector2f size, sf::Vector2f pos, const std::string& label) {
     shape.setSize(size);

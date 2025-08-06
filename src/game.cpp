@@ -1,5 +1,8 @@
 #include "Game.h"
 #include <iostream>
+#include "Player.h"
+#include "Button.h"
+#include <memory>
 
 void Game::initObjects() {
     //sf::Vector2u windowSize = window.getSize(); // for window size based placement of objects
@@ -8,7 +11,7 @@ void Game::initObjects() {
     auto player = std::make_unique<Player>(
         playerWalkTexture, playerIdleTexture,
         sf::Vector2f(window.getSize().x/2.f-32.f, window.getSize().y/2.f-32.f),
-        100.f
+        250.f
     );
     
     //Button
