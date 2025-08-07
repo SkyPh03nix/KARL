@@ -12,8 +12,7 @@ Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f p
     initAnimationSet(idleTexture, "idle", 6, 0.15f);
 
     // set initial texture and sprite
-    sprite.setTexture(walkTexture);
-    //sprite.setOrigin(64 / 2.f, 64 / 2.f); //centers the sprite correctly but puts it in top left corner of 
+    sprite.setTexture(idleTexture);
     sprite.setPosition(pos);
     sprite.setScale(4.f,4.f);
     
@@ -21,7 +20,7 @@ Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f p
 }
 
 void Player::initAnimationSet(sf::Texture& texture, const std::string& prefix, int frameCount, float frameTime, int directionsCount) {
-    texture.setSmooth(false);
+    texture.setSmooth(false); // ! important for pixel art
 
     const int frameWidth = 64;
     const int frameHeight = 64;
@@ -83,13 +82,13 @@ void Player::update(float deltaTime, const sf::RenderWindow& window) {
     anims.applyToSprite(sprite);
 
     //Check for window border
+    sf::FloatRect bounds = getGlobalBounds();
     sf::Vector2f pos = sprite.getPosition();
-    sf::Vector2f size(sprite.getGlobalBounds().width, sprite.getGlobalBounds().height);
-    if (pos.x < 0) pos.x = 0;
-    if (pos.y < 0) pos.y = 0;
-    if (pos.x + size.x > windowSize.x) pos.x = windowSize.x - size.x;
-    if (pos.y + size.y > windowSize.y) pos.y = windowSize.y - size.y;
 
+    if (bounds.left < 0) pos.x -= bounds.left; // Left
+    if (bounds.top < 0) pos.y -= bounds.top;   // Top
+    if (bounds.left + bounds.width > windowSize.x) pos.x -= (bounds.left + bounds.width - windowSize.x); // Right
+    if (bounds.top + bounds.height > windowSize.y) pos.y -= (bounds.top + bounds.height - windowSize.y); // Bottom
     sprite.setPosition(pos);
 }
 
@@ -102,9 +101,20 @@ void Player::setColor(const sf::Color& col) {
 }
 
 sf::FloatRect Player::getGlobalBounds() const {
-    return sprite.getGlobalBounds();
+    // 32x32 Box in middle of sprite //TODO look for better value here (just a guess rn)
+    float boxSize = 32.f;
+    float halfBox = boxSize / 2.f;
+
+    sf::FloatRect spriteBounds = sprite.getGlobalBounds();
+    float centerX = spriteBounds.left + spriteBounds.width / 2.f;
+    float centerY = spriteBounds.top + spriteBounds.height / 2.f;
+
+    return sf::FloatRect(centerX - halfBox, centerY - halfBox, boxSize, boxSize);
+    
+   //return sprite.getGlobalBounds(); //old version gives uncentered player bounds
 }
 
 void Player::setPosition(const sf::Vector2f& pos) {
-    sprite.setPosition(pos);
+    sf::FloatRect bounds = sprite.getGlobalBounds();
+    sprite.setPosition(pos.x - bounds.width / 2.f, pos.y - bounds.height / 2.f); //sets position with center offset
 }

@@ -25,12 +25,14 @@ void PortalSystem::tryTeleport(Player& player) {
 
     if (onP1 && portalOnCooldown != &p1) {
         if(!p2.isActive()) return;
-        player.setPosition(p2.getPosition());
+        sf::Vector2f portalCenter = p2.getPosition() + 0.5f * sf::Vector2f(p2.getBounds().width, p2.getBounds().height);
+        player.setPosition(portalCenter);
         portalOnCooldown = &p2;
         cooldownTimer = teleportCooldown;
     } else if (onP2 && portalOnCooldown != &p2) {
         if(!p1.isActive()) return;
-        player.setPosition(p1.getPosition());
+        sf::Vector2f portalCenter = p1.getPosition() + 0.5f * sf::Vector2f(p1.getBounds().width, p1.getBounds().height);
+        player.setPosition(portalCenter);
         portalOnCooldown = &p1;
         cooldownTimer = teleportCooldown;
     } else if (!onP1 && !onP2) {

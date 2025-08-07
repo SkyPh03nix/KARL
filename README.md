@@ -1,10 +1,14 @@
 UPDATE LOG:
+08.08.25
+- fixed player bounds
+- fixed end position after teleport with sprite center offset
+
 07.08.25
 - added portals and portal logic
 - started creating sprites for portals
 
 05.08.25
--added background and animations to player
+- added background and animations to player
 
 03.08.25
 - new Game class for better abstraction
@@ -15,7 +19,7 @@ Todo:
 - correct player collision bounds
 
 Plans:
-- Make Player Costomizable by adding UI to change appearance (color, clothing skins, texture)
+- Make Player Customizable by adding UI to change appearance (color, clothing skins, texture)
 - Create inventory and make a portal gun which has to be equipped in order to place portals
 - Animate portal creation, create sprites for portal and portal gun
 - ??? Local Multiplayer with customizable keybinds
