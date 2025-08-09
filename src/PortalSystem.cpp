@@ -1,19 +1,71 @@
  #include "PortalSystem.h"
+ #include <iostream>
 
 void PortalSystem::handleInput(const sf::Vector2f& mouseWorldPos, sf::Mouse::Button button) {
     if (button == sf::Mouse::Left) {
-        p1.place(mouseWorldPos, sf::Color(255, 128, 0));  // Orange
+        p1.place(mouseWorldPos, sf::Color(255, 128, 0), "orange");  // Orange
+        anims.play("orange");
+        currentAnimationP1 = "orange";
     } else if (button == sf::Mouse::Right) {
-        p2.place(mouseWorldPos, sf::Color::Blue);
+        p2.place(mouseWorldPos, sf::Color::Blue, "blue");
+        anims.play("blue");
+        currentAnimationP2 = "blue";
     }
 }
 
-void PortalSystem::update(float deltaTime) {
+void PortalSystem::update(float deltaTime, const sf::RenderWindow& window) {
+    // Cooldown Timer runterzählen
     if (cooldownTimer > 0.f) {
         cooldownTimer -= deltaTime;
         if (cooldownTimer < 0.f)
             cooldownTimer = 0.f;
     }
+
+    // Animationen updaten
+    anims.update(deltaTime);
+
+    // Aktuellen Frame für Portal 1 holen und setzen
+    if (!currentAnimationP1.empty()) {
+        sf::IntRect frameP1 = anims.getCurrentFrame(currentAnimationP1);
+        p1.updateFrame(frameP1);
+    }
+
+    // Aktuellen Frame für Portal 2 holen und setzen
+    if (!currentAnimationP2.empty()) {
+        sf::IntRect frameP2 = anims.getCurrentFrame(currentAnimationP2);
+        p2.updateFrame(frameP2);
+    }
+
+    // Portale selbst updaten (z.B. Position, Status)
+    p1.update(deltaTime, window);
+    p2.update(deltaTime, window);
+}
+
+void PortalSystem::setTexture(sf::Texture& tex) {
+    if (!animationsInitialized) {
+        std::vector<sf::IntRect> orangeFrames;
+        for (int i = 0; i < 4; i++) {
+            orangeFrames.emplace_back(i * 64, 0, 64, 64);
+        }
+        std::vector<sf::IntRect> blueFrames;
+        for (int i = 0; i < 4; i++) {
+            blueFrames.emplace_back(i * 64, 64, 64, 64);
+        }
+        std::vector<sf::IntRect> greyFrames;
+        for (int i = 0; i < 4; i++) {
+            greyFrames.emplace_back(i * 64, 128, 64, 64);
+        }
+
+        anims.addAnimation("orange", tex, orangeFrames, 0.2f, true);
+        anims.addAnimation("blue", tex, blueFrames, 0.2f, true);
+        anims.addAnimation("grey", tex, greyFrames, 0.2f, true);
+
+        animationsInitialized = true;
+        std::cout << "Animations initialized for PortalSystem\n";
+    }
+
+    p1.setTexture(tex);
+    p2.setTexture(tex);
 }
 
 void PortalSystem::tryTeleport(Player& player) {

@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include "PortalSystem.h"
+#include "RecourceManager.h"
 //TODO fix includes
 
 class Game {
@@ -16,20 +17,18 @@ class Game {
         sf::RenderWindow window;
         sf::Clock clock;
 
-        sf::Texture backgroundTexture;
-        sf::Sprite backgroundSprite;
-        sf::Texture playerWalkTexture;
-        sf::Texture playerIdleTexture;
+        ResourceManager resources;
 
+        sf::Sprite backgroundSprite;
+       
         PortalSystem portals;
         
         std::vector<std::unique_ptr<GameObject>> gameObjects;
 
-
         void initWindow();
         void initObjects();
         void initBackground();
-        void initPlayerTexture();
+        void initTextures();
 
         void processEvents();
         void update(float deltaTime);

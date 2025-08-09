@@ -18,4 +18,5 @@ class AnimationManager {
         void play(const std::string& name);
         void update(float deltaTime);
         void applyToSprite(sf::Sprite& sprite);
+        sf::IntRect getCurrentFrame(const std::string& name) const;
 };

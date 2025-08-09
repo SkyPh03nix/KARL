@@ -4,19 +4,20 @@
 #include "Button.h"
 #include <memory>
 #include <iostream>
+#include "RecourceManager.h"
 
 void Game::initObjects() {
-    //sf::Vector2u windowSize = window.getSize(); // for window size based placement of objects
     //Karl
-    initPlayerTexture();
     auto player = std::make_unique<Player>(
-        playerWalkTexture, playerIdleTexture,
+        resources.getTexture("player_walk"),
+        resources.getTexture("player_idle"),
         sf::Vector2f(window.getSize().x/2.f-32.f, window.getSize().y/2.f-32.f),
         250.f
     );
     //Button
     sf::Vector2f buttonSize(100.f,50.f);
     sf::Vector2f buttonPos(100, 100);
+
     auto button = std::make_unique<Button>(
         buttonSize,
         buttonPos,
@@ -43,22 +44,20 @@ void Game::initObjects() {
     gameObjects.push_back(std::move(button2));   
 }
 
-void Game::initPlayerTexture(){
-    if (!playerWalkTexture.loadFromFile("assets/slime/PNG/Slime1/Walk/Slime1_Walk_full.png")) {
-        std::cerr << "Error loading Player texture" <<std::endl;
-        exit(1);
-    }
-    if (!playerIdleTexture.loadFromFile("assets/slime/PNG/Slime1/Idle/Slime1_Idle_full.png")) {
-        std::cerr << "Error loading Player texture" <<std::endl;
-        exit(1);
-    }
-
+void Game::initTextures() {
+    resources.loadTexture("player_walk", "assets/slime/PNG/Slime1/Walk/Slime1_Walk_full.png");
+    resources.loadTexture("player_idle", "assets/slime/PNG/Slime1/Idle/Slime1_Idle_full.png");
+    resources.loadTexture("portal", "assets/myDesigns/Portals.png");
+    resources.loadTexture("background", "assets/background2.png");
 }
 
-Game::Game() {
+Game::Game() : portals() {
     initWindow();
+    initTextures();
     initBackground();
     initObjects();
+
+    portals.setTexture(resources.getTexture("portal"));
 }
 
 void Game::run() {
@@ -77,14 +76,10 @@ void Game::initWindow() {
 }
 
 void Game::initBackground() {
-    if (!backgroundTexture.loadFromFile("assets/background2.png")) {
-        std::cerr << "Error loading background texture!" <<std::endl;
-        exit(1);
-    }
-    backgroundSprite.setTexture(backgroundTexture);
+        backgroundSprite.setTexture(resources.getTexture("background"));
 
     sf::Vector2u windowSize = window.getSize();
-    sf::Vector2u textureSize = backgroundTexture.getSize();
+    sf::Vector2u textureSize = resources.getTexture("background").getSize();
 
     float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
     float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
@@ -112,7 +107,7 @@ void Game::update(float deltaTime) {
         obj->update(deltaTime, window);
     }
 
-    portals.update(deltaTime);
+    portals.update(deltaTime, window);
 
     for (auto& obj : gameObjects) {
         Player* player = dynamic_cast<Player*>(obj.get());

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameObject.h"
-#include <AnimationManager.h>
+#include "AnimationManager.h"
 
 class Player : public GameObject {
     private:

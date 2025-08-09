@@ -47,4 +47,13 @@ void AnimationManager::applyToSprite(sf::Sprite& sprite) {
     sprite.setTextureRect(animData.animation.getCurrentFrame());
 }
 
+sf::IntRect AnimationManager::getCurrentFrame(const std::string& name) const {
+    auto it = animations.find(name);
+    if (it == animations.end()) {
+        std::cerr << "AnimationManager::getCurrentFrame: Animation '" << name << "' nicht gefunden\n";
+        static sf::IntRect emptyRect;
+        return emptyRect;
+    }
+    return it->second.animation.getCurrentFrame();
+}
 
