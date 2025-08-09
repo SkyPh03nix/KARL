@@ -1,4 +1,8 @@
 UPDATE LOG:
+09.08.25
+- added resourceManager and changed structure of how animations are loaded
+- added animations to portals (spin)
+
 08.08.25
 - fixed player bounds
 - fixed end position after teleport with sprite center offset
