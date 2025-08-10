@@ -30,9 +30,9 @@ void PortalSystem::setTexture(sf::Texture& tex) {
             greyFrames.emplace_back(i * 64, 128, 64, 64);
         }
 
-        anims.addAnimation("orange", tex, orangeFrames, 0.2f, true);
-        anims.addAnimation("blue", tex, blueFrames, 0.2f, true);
-        anims.addAnimation("grey", tex, greyFrames, 0.2f, true);
+        anims.addAnimation("orange", tex, orangeFrames, 0.3f, true);
+        anims.addAnimation("blue", tex, blueFrames, 0.3f, true);
+        anims.addAnimation("grey", tex, greyFrames, 0.3f, true);
 
         animationsInitialized = true;
         std::cout << "Animations initialized for PortalSystem\n";

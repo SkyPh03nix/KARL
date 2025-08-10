@@ -1,4 +1,9 @@
 UPDATE LOG:
+10.08.25
+- both portals do now have animations, not only the last placed one
+- fixed problem where portal color was labeled wrong
+- changed structure of how animations are stored
+
 09.08.25
 - added resourceManager and changed structure of how animations are loaded
 - added animations to portals (spin)
