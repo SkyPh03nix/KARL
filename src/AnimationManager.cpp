@@ -10,49 +10,46 @@ void AnimationManager::addAnimation(const std::string& name, sf::Texture& textur
     animations[name] = AnimData{ &texture, Animation(frames, frameTime, loop) };
 }
         
-void AnimationManager::play(const std::string& name) {
-    if (currentAnimation != name && animations.find(name) != animations.end()) {
-        currentAnimation = name;
-        animations[currentAnimation].animation.stop();
-        animations[currentAnimation].animation.play();
+int AnimationManager::play(const std::string& name) {
+    auto it = animations.find(name);
+    if (it == animations.end()) {
+        std::cerr << "Animation '" << name << "' nicht gefunden!\n";
+        return -1;
     }
+
+    AnimationInstance instance;
+    instance.animationName = name;
+    instance.animation = it->second.animation; // Kopie der Vorlage
+    instance.animation.play();
+
+    int id = nextId++;
+    activeAnimations[id] = instance;
+    return id;
 }
         
 void AnimationManager::update(float deltaTime) {
-    if (currentAnimation.empty()) return;
-    animations[currentAnimation].animation.update(deltaTime);
+    for (auto& [id, inst] : activeAnimations) {
+        inst.animation.update(deltaTime);
+    }
 }
 
 
-void AnimationManager::applyToSprite(sf::Sprite& sprite) {
-    if (currentAnimation.empty()) {
-        std::cerr << "AnimationManager::applyToSprite: currentAnimation leer\n";
-        return;
-    }
+void AnimationManager::applyToSprite(int id, sf::Sprite& sprite) {
+    auto it = activeAnimations.find(id);
+    if (it == activeAnimations.end()) return;
 
-    auto it = animations.find(currentAnimation);
-    if (it == animations.end()) {
-        std::cerr << "AnimationManager::applyToSprite: Animation nicht gefunden\n";
-        return;
-    }
+    auto baseAnim = animations.find(it->second.animationName);
+    if (baseAnim == animations.end()) return;
 
-    const AnimData& animData = it->second;
-
-    if (!animData.texture) {
-        std::cerr << "AnimationManager::applyToSprite: Textur ist nullptr\n";
-        return;
-    }
-
-    sprite.setTexture(*animData.texture);
-    sprite.setTextureRect(animData.animation.getCurrentFrame());
+    sprite.setTexture(*baseAnim->second.texture);
+    sprite.setTextureRect(it->second.animation.getCurrentFrame());
 }
 
-sf::IntRect AnimationManager::getCurrentFrame(const std::string& name) const {
-    auto it = animations.find(name);
-    if (it == animations.end()) {
-        std::cerr << "AnimationManager::getCurrentFrame: Animation '" << name << "' nicht gefunden\n";
-        static sf::IntRect emptyRect;
-        return emptyRect;
+sf::IntRect AnimationManager::getCurrentFrame(int id) const {
+    auto it = activeAnimations.find(id);
+    if (it == activeAnimations.end()) {
+        static sf::IntRect empty;
+        return empty;
     }
     return it->second.animation.getCurrentFrame();
 }

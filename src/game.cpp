@@ -47,7 +47,7 @@ void Game::initObjects() {
 void Game::initTextures() {
     resources.loadTexture("player_walk", "assets/slime/PNG/Slime1/Walk/Slime1_Walk_full.png");
     resources.loadTexture("player_idle", "assets/slime/PNG/Slime1/Idle/Slime1_Idle_full.png");
-    resources.loadTexture("portal", "assets/myDesigns/Portals.png");
+    resources.loadTexture("portal", "assets/myDesigns/Portals3.png");
     resources.loadTexture("background", "assets/background2.png");
 }
 

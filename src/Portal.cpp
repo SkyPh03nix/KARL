@@ -3,7 +3,7 @@
 
 
 Portal::Portal(AnimationManager& animationManager)
-    : anims(animationManager), active(false), currentAnimation("") {
+    : anims(animationManager), active(false){
 }
 
 void Portal::setTexture(sf::Texture& portalTexture) {
@@ -15,20 +15,11 @@ void Portal::place(const sf::Vector2f& pos, const sf::Color& col, const std::str
     active=true;
     color = col;
 
-    currentAnimation = animationName;
-    anims.play(currentAnimation);
-} 
-
-void Portal::updateFrame(const sf::IntRect& frame) {
-    sprite.setTextureRect(frame);
+    animId = anims.play(animationName);
 }
 
 void Portal::update(float deltaTime, const sf::RenderWindow& window) {
-    if (!active) return;
+    if (!active || animId == -1) return;
 
-    anims.update(deltaTime);
-
-    // Hole den aktuellen Frame der Animation und setze das Sprite-TextureRect
-    sf::IntRect frame = anims.getCurrentFrame(currentAnimation);
-    sprite.setTextureRect(frame);
+    anims.applyToSprite(animId, sprite);
 }

@@ -12,11 +12,11 @@ Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f p
     initAnimationSet(idleTexture, "idle", 6, 0.15f);
 
     // set initial texture and sprite
-    sprite.setTexture(idleTexture);
     sprite.setPosition(pos);
     sprite.setScale(4.f,4.f);
     
-    anims.play("idle_down");
+    currentAnimId = anims.play("idle_down");
+    anims.applyToSprite(currentAnimId, sprite);
 }
 
 void Player::initAnimationSet(sf::Texture& texture, const std::string& prefix, int frameCount, float frameTime, int directionsCount) {
@@ -56,15 +56,15 @@ void Player::update(float deltaTime, const sf::RenderWindow& window) {
         // Walk Animation
         if (std::abs(movement.x) > std::abs(movement.y)) {
             if (movement.x > 0.f) {
-                anims.play("walk_right"); lastDirection = Direction::Right;
+                currentAnimId = anims.play("walk_right"); lastDirection = Direction::Right;
             } else {
-                anims.play("walk_left"); lastDirection = Direction::Left;
+                currentAnimId = anims.play("walk_left"); lastDirection = Direction::Left;
             }
         } else {
             if (movement.y > 0.f) {
-                anims.play("walk_down"); lastDirection = Direction::Down;
+                currentAnimId = anims.play("walk_down"); lastDirection = Direction::Down;
             } else {
-                anims.play("walk_up"); lastDirection = Direction::Up;
+                currentAnimId = anims.play("walk_up"); lastDirection = Direction::Up;
             }
         }
     } else {
@@ -79,7 +79,9 @@ void Player::update(float deltaTime, const sf::RenderWindow& window) {
 
     //update animation
     anims.update(deltaTime);
-    anims.applyToSprite(sprite);
+    if (currentAnimId != -1) {
+        anims.applyToSprite(currentAnimId, sprite);
+    }
 
     //Check for window border
     sf::FloatRect bounds = getGlobalBounds();

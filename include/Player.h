@@ -7,7 +7,8 @@ class Player : public GameObject {
     private:
         sf::Sprite sprite;
         //sf::FloatRect collisionBoxOffset = sf::FloatRect(16.f, 48.f, 32.f, 16.f);
-        AnimationManager anims;
+        AnimationManager anims; //TODO ehere 
+        int currentAnimId = -1;
 
         enum class Direction {Down, Up, Left, Right};
         Direction direction = Direction::Down;
