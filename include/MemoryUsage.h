@@ -12,6 +12,6 @@ inline float getMemoryUsageInMB() {
     if (GetProcessMemoryInfo(GetCurrentProcess(), &memInfo, sizeof(memInfo))) {
         return static_cast<float>(memInfo.WorkingSetSize) / (1024 * 1024);
     }
-    return -1.0f; // Fehler
+    return -1.0f;
 }
 #endif

@@ -33,7 +33,6 @@ void AnimationManager::update(float deltaTime) {
     }
 }
 
-
 void AnimationManager::applyToSprite(int id, sf::Sprite& sprite) {
     auto it = activeAnimations.find(id);
     if (it == activeAnimations.end()) return;
@@ -53,4 +52,3 @@ sf::IntRect AnimationManager::getCurrentFrame(int id) const {
     }
     return it->second.animation.getCurrentFrame();
 }
-

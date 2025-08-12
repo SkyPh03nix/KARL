@@ -6,7 +6,6 @@
 #include <memory>
 #include "PortalSystem.h"
 #include "RecourceManager.h"
-//TODO fix includes
 
 class Game {
     public:

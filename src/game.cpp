@@ -70,7 +70,7 @@ void Game::run() {
 }
 
 void Game::initWindow() {
-    sf::VideoMode mode = sf::VideoMode::getDesktopMode(); //TODO research desktop and fullscreen modes
+    sf::VideoMode mode = sf::VideoMode::getDesktopMode();
     window.create(mode, "Karl", sf::Style::Fullscreen);
     window.setFramerateLimit(60);
 }
@@ -87,7 +87,6 @@ void Game::initBackground() {
     backgroundSprite.setScale(scaleX, scaleY);
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
-
 
 void Game::processEvents() {
     sf::Event event;

@@ -35,7 +35,7 @@ void PortalSystem::setTexture(sf::Texture& tex) {
         anims.addAnimation("grey", tex, greyFrames, 0.3f, true);
 
         animationsInitialized = true;
-        std::cout << "Animations initialized for PortalSystem\n";
+        //std::cout << "Animations initialized for PortalSystem\n";
     }
 
     p1.setTexture(tex);

@@ -13,8 +13,8 @@ class PortalSystem {
         std::string currentAnimationP1;
         std::string currentAnimationP2;
 
-        const float teleportCooldown = 0.f; //falls portale spaeter laengeren cooldown haben sollen //TODO entfernen wenn nicht
-        float cooldownTimer = 0.f; //auch entfernen
+        const float teleportCooldown = 0.f; 
+        float cooldownTimer = 0.f; 
         Portal* portalOnCooldown = nullptr;
 
     public:

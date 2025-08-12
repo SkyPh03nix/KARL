@@ -1,5 +1,5 @@
 #include "Button.h"
-#include <iostream>
+#include <iostream> //cerr
 #include "Utils.h"
 #include "GameObject.h"
 #include <functional>
@@ -15,7 +15,7 @@ Button::Button(sf::Vector2f size, sf::Vector2f pos, const std::string& label) {
     }
     text.setFont(font);
     text.setString(label);
-    //text.setStyle(sf::Text::Bold);
+    text.setStyle(sf::Text::Bold);
     text.setCharacterSize(14);
 
     // Position Text
@@ -26,7 +26,6 @@ Button::Button(sf::Vector2f size, sf::Vector2f pos, const std::string& label) {
         pos.x + size.x / 2.0f,
         pos.y + size.y / 2.0f
     );
-
     text.setFillColor(getContrastingTextColor(shape.getFillColor()));
 }
 
@@ -41,7 +40,7 @@ void Button::setOnClick(std::function<void()> callback) {
 
 bool Button::isMouseOver(const sf::RenderWindow& window) const {
     auto mousePos = sf::Mouse::getPosition(window);
-    auto mousePosF = window.mapPixelToCoords(mousePos); //TODO was macht das??
+    auto mousePosF = window.mapPixelToCoords(mousePos);
     return shape.getGlobalBounds().contains(mousePosF);
 }
 
@@ -60,22 +59,3 @@ void Button::draw(sf::RenderWindow& window) {
     window.draw(shape);
     window.draw(text);
 }
-
-/*
-void Button::update(Player& player) {
-    if (shape.getGlobalBounds().intersects(player.getGlobalBounds())) {
-        if (!active) player.setColor(sf::Color(rand()%255, rand()%255, rand()%255));
-        active = true;
-        //player.setColor(sf::Color::Magenta);
-    } else {
-        active = false;
-    }
-}
-
-
-
-bool Button::isActive() const {
-    return active;
-}
-
-*/

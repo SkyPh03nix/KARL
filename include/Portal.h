@@ -4,11 +4,10 @@
 
 class Portal : public GameObject {
     private: 
-        //sf::RectangleShape shape; //TODO change to sprite later
         AnimationManager& anims; 
         bool active = false;
-        //std::string currentAnimation;
         int animId = -1;
+        
         sf::Sprite sprite;
         sf::Color color;        
 

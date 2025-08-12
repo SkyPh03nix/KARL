@@ -21,7 +21,6 @@ class Button : public GameObject {
 
         void updateTextColor();
 
-        //void update(const sf::RenderWindow& window) override;
         void update(float deltaTime, const sf::RenderWindow& window) override;
         void draw(sf::RenderWindow& window) override;
 };

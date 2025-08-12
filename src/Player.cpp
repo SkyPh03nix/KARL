@@ -20,10 +20,9 @@ Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f p
 }
 
 void Player::initAnimationSet(sf::Texture& texture, const std::string& prefix, int frameCount, float frameTime, int directionsCount) {
-    texture.setSmooth(false); // ! important for pixel art
+    texture.setSmooth(false);
 
-    const int frameWidth = 64;
-    const int frameHeight = 64;
+    const int frameWidth = 64, frameHeight = 64;
 
     for (int dir = 0; dir < directionsCount; ++dir) {
         std::vector<sf::IntRect> frames;
@@ -103,7 +102,6 @@ void Player::setColor(const sf::Color& col) {
 }
 
 sf::FloatRect Player::getGlobalBounds() const {
-    // 32x32 Box in middle of sprite //TODO look for better value here (just a guess rn)
     float boxSize = 32.f;
     float halfBox = boxSize / 2.f;
 
@@ -112,8 +110,6 @@ sf::FloatRect Player::getGlobalBounds() const {
     float centerY = spriteBounds.top + spriteBounds.height / 2.f;
 
     return sf::FloatRect(centerX - halfBox, centerY - halfBox, boxSize, boxSize);
-    
-   //return sprite.getGlobalBounds(); //old version gives uncentered player bounds
 }
 
 void Player::setPosition(const sf::Vector2f& pos) {
