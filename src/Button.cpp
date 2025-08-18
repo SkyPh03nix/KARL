@@ -9,7 +9,7 @@ Button::Button(sf::Vector2f size, sf::Vector2f pos, const std::string& label) {
     shape.setPosition(pos);
     shape.setFillColor(sf::Color::Cyan);
 
-    if (!font.loadFromFile("assets/arial.ttf")) {
+    if (!font.loadFromFile("assets/used/arial.ttf")) {
         std::cerr << "Fehler: Schriftart konnte nicht geladen werden!" << std::endl;
         exit(1);
     }

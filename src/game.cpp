@@ -45,10 +45,10 @@ void Game::initObjects() {
 }
 
 void Game::initTextures() {
-    resources.loadTexture("player_walk", "assets/slime/PNG/Slime1/Walk/Slime1_Walk_full.png");
-    resources.loadTexture("player_idle", "assets/slime/PNG/Slime1/Idle/Slime1_Idle_full.png");
-    resources.loadTexture("portal", "assets/myDesigns/Portals3.png");
-    resources.loadTexture("background", "assets/background2.png");
+    resources.loadTexture("player_walk", "assets/used/Slime1_Walk_full.png");
+    resources.loadTexture("player_idle", "assets/used/Slime1_Idle_full.png");
+    resources.loadTexture("portal", "assets/used/Portals3.png");
+    resources.loadTexture("background", "assets/used/background2.png");
 }
 
 Game::Game() : portals() {

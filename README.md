@@ -1,4 +1,7 @@
 UPDATE LOG:
+12.08.25
+- cleanup of code and comments
+
 10.08.25
 - both portals do now have animations, not only the last placed one
 - fixed problem where portal color was labeled wrong
