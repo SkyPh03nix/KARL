@@ -8,6 +8,7 @@ class Player : public GameObject {
         sf::Sprite sprite;
         AnimationManager anims; 
         int currentAnimId = -1;
+        std::string currentAnimName;
 
         enum class Direction {Down, Up, Left, Right};
         Direction direction = Direction::Down;

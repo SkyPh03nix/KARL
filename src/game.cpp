@@ -42,6 +42,7 @@ void Game::initObjects() {
     gameObjects.push_back(std::move(player));
     gameObjects.push_back(std::move(button)); 
     gameObjects.push_back(std::move(button2));   
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
 void Game::initTextures() {
@@ -49,6 +50,7 @@ void Game::initTextures() {
     resources.loadTexture("player_idle", "assets/used/Slime1_Idle_full.png");
     resources.loadTexture("portal", "assets/used/Portals3.png");
     resources.loadTexture("background", "assets/used/background2.png");
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
 Game::Game() : portals() {
@@ -58,6 +60,7 @@ Game::Game() : portals() {
     initObjects();
 
     portals.setTexture(resources.getTexture("portal"));
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
 void Game::run() {
@@ -73,6 +76,7 @@ void Game::initWindow() {
     sf::VideoMode mode = sf::VideoMode::getDesktopMode();
     window.create(mode, "Karl", sf::Style::Fullscreen);
     window.setFramerateLimit(60);
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
 void Game::initBackground() {

@@ -8,8 +8,8 @@ Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f p
     : speed(speed){
 
     // init animations
-    initAnimationSet(walkTexture, "walk", 8, 0.1f);
-    initAnimationSet(idleTexture, "idle", 6, 0.15f);
+    initAnimationSet(walkTexture, "walk", 8, 0.1f, 4);
+    initAnimationSet(idleTexture, "idle", 6, 0.15f, 4);
 
     // set initial texture and sprite
     sprite.setPosition(pos);
@@ -17,6 +17,7 @@ Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f p
     
     currentAnimId = anims.play("idle_down");
     anims.applyToSprite(currentAnimId, sprite);
+    currentAnimName = "idle_down";
 }
 
 void Player::initAnimationSet(sf::Texture& texture, const std::string& prefix, int frameCount, float frameTime, int directionsCount) {
@@ -51,29 +52,36 @@ void Player::update(float deltaTime, const sf::RenderWindow& window) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) movement.x += speed * deltaTime;
     sprite.move(movement);
 
+    std::string nextAnim;
+
     if (movement.x != 0.f || movement.y != 0.f) {
         // Walk Animation
         if (std::abs(movement.x) > std::abs(movement.y)) {
             if (movement.x > 0.f) {
-                currentAnimId = anims.play("walk_right"); lastDirection = Direction::Right;
+                nextAnim = "walk_right"; lastDirection = Direction::Right;
             } else {
-                currentAnimId = anims.play("walk_left"); lastDirection = Direction::Left;
+                nextAnim = "walk_left"; lastDirection = Direction::Left;
             }
         } else {
             if (movement.y > 0.f) {
-                currentAnimId = anims.play("walk_down"); lastDirection = Direction::Down;
+                nextAnim = "walk_down"; lastDirection = Direction::Down;
             } else {
-                currentAnimId = anims.play("walk_up"); lastDirection = Direction::Up;
+                nextAnim = "walk_up"; lastDirection = Direction::Up;
             }
         }
     } else {
         // Idle Animation
         switch (lastDirection) {
-            case Direction::Down:  anims.play("idle_down"); break;
-            case Direction::Left:  anims.play("idle_left"); break;
-            case Direction::Right: anims.play("idle_right"); break;
-            case Direction::Up:    anims.play("idle_up"); break;
+            case Direction::Down:  nextAnim = "idle_down"; break;
+            case Direction::Left:  nextAnim = "idle_left"; break;
+            case Direction::Right: nextAnim = "idle_right"; break;
+            case Direction::Up:    nextAnim = "idle_up"; break;
         }
+    }
+
+    if (nextAnim != currentAnimName) {
+        currentAnimId = anims.play(nextAnim);
+        currentAnimName = nextAnim;
     }
 
     //update animation

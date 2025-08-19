@@ -6,7 +6,7 @@
 #include <string>
 
 void AnimationManager::addAnimation(const std::string& name, sf::Texture& texture, const std::vector<sf::IntRect>& frames, float frameTime, bool loop) {
-    std::cout << "Add Animation: " << name << " mit " << frames.size() << " Frames\n";
+    std::cout << "AnimationManager::" << __func__ << ":" << name << " mit " << frames.size() << " Frames\n";
     animations[name] = AnimData{ &texture, Animation(frames, frameTime, loop) };
 }
         
