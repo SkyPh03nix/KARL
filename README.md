@@ -1,4 +1,10 @@
 UPDATE LOG:
+20.08.25
+- position of portal placement and player placement relative to portal after teleport is now correct
+
+19.08.25
+- animations are now again played correctly 
+
 12.08.25
 - cleanup of code and comments
 
