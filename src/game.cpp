@@ -59,6 +59,8 @@ Game::Game() : portals() {
     initBackground();
     initObjects();
 
+    camera.setSize(window.getSize().x, window.getSize().y);
+
     portals.setTexture(resources.getTexture("portal"));
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
@@ -116,6 +118,7 @@ void Game::update(float deltaTime) {
         Player* player = dynamic_cast<Player*>(obj.get());
         if (player) {
             portals.tryTeleport(*player);
+            camera.setCenter(player->getPosition());
             break;
         }
     }
@@ -123,6 +126,7 @@ void Game::update(float deltaTime) {
 
 void Game::render() {
     window.clear();
+    window.setView(camera);
     window.draw(backgroundSprite);
 
     portals.draw(window);

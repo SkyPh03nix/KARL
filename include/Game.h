@@ -15,6 +15,7 @@ class Game {
     private:
         sf::RenderWindow window;
         sf::Clock clock;
+        sf::View camera;
 
         ResourceManager resources;
 

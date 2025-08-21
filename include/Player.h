@@ -26,4 +26,5 @@ class Player : public GameObject {
         void setColor(const sf::Color& col);
         void setPosition(const sf::Vector2f& pos);
         sf::FloatRect getGlobalBounds() const;
+        sf::Vector2f getPosition() const {return sprite.getPosition();}
 };
