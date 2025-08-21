@@ -1,4 +1,8 @@
 UPDATE LOG:
+21.08.25
+- added camera view centered on the player
+- did some preparation for tilemap implementation
+
 20.08.25
 - position of portal placement and player placement relative to portal after teleport is now correct
 
