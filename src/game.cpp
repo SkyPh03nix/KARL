@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <iostream>
+#include <cmath>
 #include "Player.h"
 #include "Button.h"
 #include <memory>
@@ -12,7 +13,7 @@ void Game::initObjects() {
         resources.getTexture("player_walk"),
         resources.getTexture("player_idle"),
         sf::Vector2f(window.getSize().x/2.f-32.f, window.getSize().y/2.f-32.f),
-        250.f
+        300.f
     );
     //Button
     sf::Vector2f buttonSize(100.f,50.f);
@@ -49,7 +50,9 @@ void Game::initTextures() {
     resources.loadTexture("player_walk", "assets/used/Slime1_Walk_full.png");
     resources.loadTexture("player_idle", "assets/used/Slime1_Idle_full.png");
     resources.loadTexture("portal", "assets/used/Portals3.png");
-    resources.loadTexture("background", "assets/used/background2.png");
+    //resources.loadTexture("background", "assets/used/background2.png");
+    //resources.loadTexture("background", "assets/PixelArtPack/SceneOverview.png"); // for now better
+    resources.loadTexture("background", "assets/grassbg.png");
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
@@ -82,15 +85,15 @@ void Game::initWindow() {
 }
 
 void Game::initBackground() {
-        backgroundSprite.setTexture(resources.getTexture("background"));
+    backgroundSprite.setTexture(resources.getTexture("background"));
 
     sf::Vector2u windowSize = window.getSize();
     sf::Vector2u textureSize = resources.getTexture("background").getSize();
 
-    float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
-    float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
+    //float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
+    //float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
 
-    backgroundSprite.setScale(scaleX, scaleY);
+    backgroundSprite.setScale(4, 4);
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
@@ -127,7 +130,29 @@ void Game::update(float deltaTime) {
 void Game::render() {
     window.clear();
     window.setView(camera);
-    window.draw(backgroundSprite);
+
+    //draw background repeatedly untill view is filled
+    sf::Vector2f camPos = camera.getCenter();
+    sf::Vector2u texSize = resources.getTexture("background").getSize();
+    sf::Vector2u winSize = window.getSize();
+
+    // Startposition auf die nächste untere linke Tile runden
+    float startX = std::floor((camPos.x - winSize.x / 2.f) / texSize.x) * texSize.x;
+    float startY = std::floor((camPos.y - winSize.y / 2.f) / texSize.y) * texSize.y;
+
+    // Anzahl der Tiles: immer +2 extra für den rechten und unteren Rand
+    int tilesX = winSize.x / texSize.x + 2;
+    int tilesY = winSize.y / texSize.y + 2;
+
+    sf::Sprite bg(resources.getTexture("background"));
+
+    for (int i = 0; i < tilesX; ++i) {
+        for (int j = 0; j < tilesY; ++j) {
+            bg.setPosition(startX + i * texSize.x, startY + j * texSize.y);
+            window.draw(bg);
+        }
+    }
+    //window.draw(backgroundSprite);
 
     portals.draw(window);
 
