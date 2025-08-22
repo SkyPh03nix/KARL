@@ -94,10 +94,10 @@ void Player::update(float deltaTime, const sf::RenderWindow& window) {
     sf::FloatRect bounds = getGlobalBounds();
     sf::Vector2f pos = sprite.getPosition();
 
-    if (bounds.left < 0) pos.x -= bounds.left; // Left
-    if (bounds.top < 0) pos.y -= bounds.top;   // Top
-    if (bounds.left + bounds.width > windowSize.x) pos.x -= (bounds.left + bounds.width - windowSize.x); // Right
-    if (bounds.top + bounds.height > windowSize.y) pos.y -= (bounds.top + bounds.height - windowSize.y); // Bottom
+    //if (bounds.left < 0) pos.x -= bounds.left; // Left
+    //if (bounds.top < 0) pos.y -= bounds.top;   // Top
+    //if (bounds.left + bounds.width > windowSize.x) pos.x -= (bounds.left + bounds.width - windowSize.x); // Right
+    //if (bounds.top + bounds.height > windowSize.y) pos.y -= (bounds.top + bounds.height - windowSize.y); // Bottom
     sprite.setPosition(pos);
 }
 

@@ -49,7 +49,8 @@ void Game::initTextures() {
     resources.loadTexture("player_walk", "assets/used/Slime1_Walk_full.png");
     resources.loadTexture("player_idle", "assets/used/Slime1_Idle_full.png");
     resources.loadTexture("portal", "assets/used/Portals3.png");
-    resources.loadTexture("background", "assets/used/background2.png");
+    //resources.loadTexture("background", "assets/used/background2.png");
+    resources.loadTexture("background", "assets/PixelArtPack/SceneOverview.png"); // for now better
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
@@ -87,10 +88,10 @@ void Game::initBackground() {
     sf::Vector2u windowSize = window.getSize();
     sf::Vector2u textureSize = resources.getTexture("background").getSize();
 
-    float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
-    float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
+    //float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
+    //float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
 
-    backgroundSprite.setScale(scaleX, scaleY);
+    backgroundSprite.setScale(4, 4);
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 }
 
