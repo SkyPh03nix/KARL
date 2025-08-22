@@ -87,8 +87,8 @@ void Game::initWindow() {
 void Game::initBackground() {
     backgroundSprite.setTexture(resources.getTexture("background"));
 
-    sf::Vector2u windowSize = window.getSize();
-    sf::Vector2u textureSize = resources.getTexture("background").getSize();
+    //sf::Vector2u windowSize = window.getSize();
+    //sf::Vector2u textureSize = resources.getTexture("background").getSize();
 
     //float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
     //float scaleY = static_cast<float>(windowSize.y) / textureSize.y;

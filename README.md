@@ -1,4 +1,15 @@
 UPDATE LOG:
+
+FIXME:
+- !!! Player position is not centered on screen
+
+22.08.25
+- added infinitely looping background as preparation for spawning trees randomly
+- fixed issues with unused variables
+    Tomorrow:
+        - implement random trees spawning
+        - implement functionality to make them disappear when interacted with
+
 21.08.25
 - added camera view centered on the player
 - did some preparation for tilemap implementation
