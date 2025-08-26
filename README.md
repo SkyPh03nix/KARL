@@ -1,48 +1,23 @@
-UPDATE LOG:
-21.08.25
-- added camera view centered on the player
-- did some preparation for tilemap implementation
+# 🫠 Karl – A Small RPG Experiment in C++/SFML
 
-20.08.25
-- position of portal placement and player placement relative to portal after teleport is now correct
+**Karl** is a little side project I started because I wanted to start learning **SFML** and get better at **C++**. 
+Instead of using a big game engine, I wanted to create something from scratch and really understand the **underlying logic of game development**. 
 
-19.08.25
-- animations are now again played correctly 
+👉 Please note: I’m still a beginner.  
+This project is mainly a **test playground** where I try out random ideas for fun and learning.
 
-12.08.25
-- cleanup of code and comments
+## Current Features
+- A player character with simple animations (idle, walk)
+- Placeable **portals** you can walk through
+- **UI buttons** to change the player’s color
+- A background image that currently loops infinitely
+- A basic game loop (`init`, `update`, `render`)
 
-10.08.25
-- both portals do now have animations, not only the last placed one
-- fixed problem where portal color was labeled wrong
-- changed structure of how animations are stored
+---
 
-09.08.25
-- added resourceManager and changed structure of how animations are loaded
-- added animations to portals (spin)
+## 🔮 Ideas / Goals
 
-08.08.25
-- fixed player bounds
-- fixed end position after teleport with sprite center offset
-
-07.08.25
-- added portals and portal logic
-- started creating sprites for portals
-
-05.08.25
-- added background and animations to player
-
-03.08.25
-- new Game class for better abstraction
-- Clickable Buttons with Lambdas as onClick
-
-Todo:
-- add asset folder to repo for easy access
-- correct player collision bounds
-
-Plans:
-- Make Player Customizable by adding UI to change appearance (color, clothing skins, texture)
-- Create inventory and make a portal gun which has to be equipped in order to place portals
-- Animate portal creation, create sprites for portal and portal gun
-- ??? Local Multiplayer with customizable keybinds
-- ??? AI Enemies with movement
+- 🌍 **Tilemap system** (chunk-based, possibly infinite, procedurally generated)  
+- 🌳 **World objects** like trees and rocks with collision  
+- 🪓 **Inventory + tools** (e.g. chop down trees with an axe)  
+- 💾 **Saving/loading world changes**  
