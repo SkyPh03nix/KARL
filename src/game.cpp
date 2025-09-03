@@ -3,6 +3,9 @@
 #include <cmath>
 #include "Player.h"
 #include "Button.h"
+#include "Tree.h"
+#include <fstream>
+#include <random>
 #include <memory>
 #include <iostream>
 #include "RecourceManager.h"
@@ -47,8 +50,46 @@ void Game::initTextures() {
     resources.loadTexture("player_idle", "assets/used/Slime1_Idle_full.png");
     resources.loadTexture("portal", "assets/used/Portals3.png");
     //resources.loadTexture("background", "assets/PixelArtPack/SceneOverview.png"); // for now better
-    resources.loadTexture("background", "assets/grassbg.png");
+    resources.loadTexture("background", "assets/used/grassbg.png");
+    resources.loadTexture("tree", "assets/tree1.png");
     std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
+}
+
+void Game::initTrees() {
+
+    //TODO save tree positions to file and load from it
+
+
+    //std::ifstream in("gamesave.txt");
+    //std::vector<sf::Vector2f> treePositions;
+
+    //float x, y;
+    //while (in >> x >> y) {
+        //treePositions.emplace_back(x, y);
+        //gameObjects.push_back(std::make_unique<Tree>(sf::Vector2f(x, y), resources.getTexture("assets/tree1.png")));
+    //}
+    //in.close();
+
+    //std::mt19937 rng(std::random_device{}());
+
+    //std::uniform_real_distribution<float> distX(
+    //      camera.getCenter().x - window.getSize().x/2.f, 
+    //      camera.getCenter().x + window.getSize().x/2.f
+    //);
+    //std::uniform_real_distribution<float> distY(
+    //      camera.getCenter().y - window.getSize().y/2.f, 
+    //      camera.getCenter().y + window.getSize().y/2.f
+    //);
+
+    //while (treePositions.size() < 100) {
+    //    treePositions.emplace_back(distX(rng), distY(rng));
+    //}
+
+    //std::ofstream out("gamesave.txt");
+    //for (const auto& pos : treePositions) {
+    //    gameObjects.push_back(std::make_unique<Tree>(pos, resources.getTexture("assets/tree1.png")));
+    //    out << pos.x << " " << pos.y << "\n";
+    //}
 }
 
 Game::Game() : portals() {
@@ -56,8 +97,9 @@ Game::Game() : portals() {
     initTextures();
     initBackground();
     initObjects();
-
     camera.setSize(window.getSize().x, window.getSize().y);
+    
+    initTrees();
 
     portals.setTexture(resources.getTexture("portal"));
     std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
@@ -105,16 +147,57 @@ void Game::update(float deltaTime) {
     for (auto& obj : gameObjects) {
         obj->update(deltaTime, window);
     }
-
     portals.update(deltaTime, window);
 
+    sf::Vector2f playerPos;
     for (auto& obj : gameObjects) {
-        Player* player = dynamic_cast<Player*>(obj.get());
-        if (player) {
+        if (Player* player = dynamic_cast<Player*>(obj.get())) {
             portals.tryTeleport(*player);
             camera.setCenter(player->getPosition());
+            playerPos = player->getPosition();
             break;
         }
+    }
+
+    sf::Vector2u winSize = window.getSize();
+    float left   = playerPos.x - winSize.x / 2.f;
+    float right  = playerPos.x + winSize.x / 2.f;
+    float top    = playerPos.y - winSize.y / 2.f;
+    float bottom = playerPos.y + winSize.y / 2.f;
+
+    // delete trees outside of an extended view area
+    float margin = 300.f;
+    visibleTrees.erase(
+        std::remove_if(visibleTrees.begin(), visibleTrees.end(),
+            [left, right, top, bottom, margin](const std::unique_ptr<Tree>& tree) {
+                sf::Vector2f pos = tree->getPosition();
+                return (pos.x < left - margin || pos.x > right + margin ||
+                        pos.y < top - margin  || pos.y > bottom + margin);
+            }),
+        visibleTrees.end()
+    );
+
+    //random values
+    static std::mt19937 rng(std::random_device{}());
+    std::uniform_real_distribution<float> distX(left, right);
+    std::uniform_real_distribution<float> distY(top, bottom);
+
+    int currentCount     = static_cast<int>(visibleTrees.size());
+    int targetTreeCount  = 3 + (rng() % 3); // 3, 4 or 5 trees
+
+    while (currentCount < targetTreeCount) {
+        sf::Vector2f newPos(distX(rng), distY(rng));
+        visibleTrees.push_back(
+            std::make_unique<Tree>(newPos, resources.getTexture("tree"))
+        );
+        currentCount++;
+    }
+
+    // debug 
+    std::cout << "Bäume im Sichtfeld: " << visibleTrees.size() << std::endl;
+    for (const auto& tree : visibleTrees) {
+        sf::Vector2f pos = tree->getPosition();
+        std::cout << "   Baum bei (" << pos.x << ", " << pos.y << ")\n";
     }
 }
 
@@ -150,5 +233,10 @@ void Game::render() {
     for (auto& obj : gameObjects) {
         obj->draw(window);
     }
+
+    for (const auto& tree : visibleTrees) {
+        tree->draw(window);
+    }
+
     window.display();
 }

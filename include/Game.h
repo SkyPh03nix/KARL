@@ -4,6 +4,7 @@
 #include <GameObject.h>
 #include <vector>
 #include <memory>
+#include "Tree.h"
 #include "PortalSystem.h"
 #include "RecourceManager.h"
 
@@ -22,6 +23,8 @@ class Game {
         sf::Sprite backgroundSprite;
        
         PortalSystem portals;
+
+        std::vector<std::unique_ptr<Tree>> visibleTrees;
         
         std::vector<std::unique_ptr<GameObject>> gameObjects;
 
@@ -29,6 +32,7 @@ class Game {
         void initObjects();
         void initBackground();
         void initTextures();
+        void initTrees();
 
         void processEvents();
         void update(float deltaTime);
