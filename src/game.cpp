@@ -44,7 +44,7 @@ void Game::initTextures() {
     resources.loadTexture("player_idle", "assets/used/Slime1_Idle_full.png");
     resources.loadTexture("portal", "assets/used/Portals.png");
     resources.loadTexture("background", "assets/used/grassbg.png");
-    resources.loadTexture("tree", "assets/tree1.png");
+    resources.loadTexture("tree", "assets/used/tree.png");
     //std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
 }
 
@@ -135,18 +135,32 @@ void Game::processEvents() {
 }
 
 void Game::update(float deltaTime) {
+    Player* playerPtr = nullptr;
+    for (auto& obj : gameObjects) {
+        if (auto* p = dynamic_cast<Player*>(obj.get())) {
+            playerPtr = p;
+            break;
+        }
+    }
+
+    sf::Vector2f oldPlayerPos = playerPtr ? playerPtr->getPosition() : sf::Vector2f(0.f, 0.f);
+
     for (auto& obj : gameObjects) {
         obj->update(deltaTime, window);
     }
     portals.update(deltaTime, window);
 
-    sf::Vector2f playerPos;
-    for (auto& obj : gameObjects) {
-        if (Player* player = dynamic_cast<Player*>(obj.get())) {
-            portals.tryTeleport(*player);
-            camera.setCenter(player->getPosition());
-            playerPos = player->getPosition();
-            break;
+    if (playerPtr) {
+        portals.tryTeleport(*playerPtr);
+        camera.setCenter(playerPtr->getPosition());
+
+        // Check for portal collisions
+        for (const auto& tree : visibleTrees) {
+            if (playerPtr->getGlobalBounds().intersects(tree->getBounds())) {
+                playerPtr->setPosition(oldPlayerPos); // Revert to old position on collision
+                camera.setCenter(oldPlayerPos);
+                break;
+            }
         }
     }
 
@@ -175,7 +189,7 @@ void Game::update(float deltaTime) {
 
     int minTrees = 3;
     int maxTrees = 5;
-    int targetTreeCount  = minTrees + (rng() % maxTrees - minTrees + 1); // random between min and max
+    int targetTreeCount  = minTrees + (rng() % (maxTrees - minTrees + 1)); // random between min and max
     int tries = 0;
     int maxTries = 10; // avoid infinite loop
 
@@ -194,6 +208,10 @@ void Game::update(float deltaTime) {
             visibleTrees.push_back(std::make_unique<Tree>(newPos, resources.getTexture("tree")));
         }
         ++tries;
+    }
+
+    for (const auto& tree : visibleTrees) {
+        tree->setScale(3.f, 3.f);
     }
 
     // debug 
@@ -235,10 +253,24 @@ void Game::render() {
 
     for (auto& obj : gameObjects) {
         obj->draw(window);
+        //draw bounds
+        if (Player* player = dynamic_cast<Player*>(obj.get())) { //debug
+        auto pb = player->getGlobalBounds(); //debug
+        sf::RectangleShape r({pb.width, pb.height}); //debug
+        r.setPosition(pb.left, pb.top); //debug
+        r.setFillColor(sf::Color(255, 0, 0, 100)); //debug
+        window.draw(r); //debug
+    }
     }
 
     for (const auto& tree : visibleTrees) {
         tree->draw(window);
+        //draw bounds
+        auto tb = tree->getBounds(); //debug
+        sf::RectangleShape r({tb.width, tb.height}); //debug
+        r.setPosition(tb.left, tb.top); //debug
+        r.setFillColor(sf::Color(0, 255, 0, 100)); //debug
+        window.draw(r);
     }
 
     window.display();

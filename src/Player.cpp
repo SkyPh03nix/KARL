@@ -106,18 +106,7 @@ void Player::update(float deltaTime, const sf::RenderWindow& window) {
 }
 
 void Player::draw(sf::RenderWindow& window) {
-    window.draw(sprite);
-
-    //draw bounds of player
-    sf::FloatRect bounds = getGlobalBounds();
-
-    sf::RectangleShape rect;
-    rect.setPosition(bounds.left, bounds.top);
-    rect.setSize(sf::Vector2f(bounds.width, bounds.height));
-    rect.setFillColor(sf::Color::Transparent);
-    rect.setOutlineColor(sf::Color::Red);
-    rect.setOutlineThickness(1.f);
-    window.draw(rect);    
+    window.draw(sprite); 
 }
 
 void Player::setColor(const sf::Color& col) {
@@ -126,7 +115,7 @@ void Player::setColor(const sf::Color& col) {
 
 sf::FloatRect Player::getGlobalBounds() const {
     //custom function so the collision box is smaller and centered
-    float boxSize = 32.f;
+    float boxSize = 48.f;
     float halfBox = boxSize / 2.f;
 
     sf::FloatRect spriteBounds = sprite.getGlobalBounds();
@@ -137,6 +126,7 @@ sf::FloatRect Player::getGlobalBounds() const {
 }
 
 void Player::setPosition(const sf::Vector2f& pos) {
-    sf::FloatRect bounds = sprite.getGlobalBounds();
-    sprite.setPosition(pos.x - bounds.width / 2.f, pos.y - bounds.height / 2.f); //sets position with center offset
+    //sf::FloatRect bounds = sprite.getGlobalBounds();
+    //sprite.setPosition(pos.x - bounds.width / 2.f, pos.y - bounds.height / 2.f); //sets position with center offset
+    sprite.setPosition(pos);
 }
