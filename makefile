@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Iinclude -IC:/includes/SFML-2.6.1/include
+CXXFLAGS = -std=c++17 -Wall -Iinclude -IC:/includes/SFML-2.6.1/include -MMD -MP
 
 # SFML path and libs
 SFML_LIB_PATH = -LC:/includes/SFML-2.6.1/lib
