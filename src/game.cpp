@@ -1,14 +1,14 @@
 #include "Game.h"
-#include <iostream>
-#include <cmath>
 #include "Player.h"
 #include "Button.h"
 #include "Tree.h"
+#include "RecourceManager.h"
+
+#include <iostream>
 #include <fstream>
+#include <cmath>
 #include <random>
 #include <memory>
-#include <iostream>
-#include "RecourceManager.h"
 
 void Game::initObjects() {
     //Player
@@ -22,19 +22,13 @@ void Game::initObjects() {
     //Buttons
     sf::Vector2f buttonSize(100.f,50.f);
 
-    //Button 1
-    sf::Vector2f buttonPos(100, 100);
-    auto button = std::make_unique<Button>(buttonSize,buttonPos,"Make Red" ); //TODO fitTextToButton() function
+    auto button = std::make_unique<Button>(buttonSize,sf::Vector2f(100,100),"Make Red" ); //TODO fitTextToButton() function
     button->setOnClick([&p = *player](){p.setColor(sf::Color::Red);});
     
-    //Button 2
-    sf::Vector2f button2Pos(100, 200);
-    auto button2 = std::make_unique<Button>(buttonSize,button2Pos,"Make Green");
+    auto button2 = std::make_unique<Button>(buttonSize,sf::Vector2f(100,200),"Make Green");
     button2->setOnClick([&p = *player](){p.setColor(sf::Color::Green);});
 
-    //Button 3
-    sf::Vector2f button3Pos(100, 300);
-    auto button3 = std::make_unique<Button>(buttonSize,button3Pos,"Reset Color");
+    auto button3 = std::make_unique<Button>(buttonSize,sf::Vector2f(100,300),"Reset Color");
     button3->setOnClick([&p = *player](){p.setColor(sf::Color::White);});
     
     // !!! only do this at end of function (move destroys the local objects) !!!
@@ -42,17 +36,16 @@ void Game::initObjects() {
     gameObjects.push_back(std::move(button)); 
     gameObjects.push_back(std::move(button2));
     gameObjects.push_back(std::move(button3)); 
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    //std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
 }
 
 void Game::initTextures() {
     resources.loadTexture("player_walk", "assets/used/Slime1_Walk_full.png");
     resources.loadTexture("player_idle", "assets/used/Slime1_Idle_full.png");
-    resources.loadTexture("portal", "assets/used/Portals3.png");
-    //resources.loadTexture("background", "assets/PixelArtPack/SceneOverview.png"); // for now better
+    resources.loadTexture("portal", "assets/used/Portals.png");
     resources.loadTexture("background", "assets/used/grassbg.png");
     resources.loadTexture("tree", "assets/tree1.png");
-    std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
+    //std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
 }
 
 void Game::initTrees() {
@@ -98,11 +91,9 @@ Game::Game() : portals() {
     initBackground();
     initObjects();
     camera.setSize(window.getSize().x, window.getSize().y);
-    
     initTrees();
-
     portals.setTexture(resources.getTexture("portal"));
-    std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
+    //std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
 }
 
 void Game::run() {
@@ -118,13 +109,13 @@ void Game::initWindow() {
     sf::VideoMode mode = sf::VideoMode::getDesktopMode();
     window.create(mode, "Karl", sf::Style::Fullscreen);
     window.setFramerateLimit(60);
-    std::cout << __PRETTY_FUNCTION__ << std::endl; // debug
+    //std::cout << __PRETTY_FUNCTION__ << std::endl; // debug
 }
 
 void Game::initBackground() {
     backgroundSprite.setTexture(resources.getTexture("background"));
     backgroundSprite.setScale(4, 4);
-    std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
+    //std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
 }
 
 void Game::processEvents() {
@@ -137,7 +128,7 @@ void Game::processEvents() {
         } else if(event.type == sf::Event::MouseButtonPressed) {
             sf::Vector2f mouseWorld = window.mapPixelToCoords(sf::Mouse::getPosition(window));
             portals.handleInput(mouseWorld, event.mouseButton.button);
-        } else if(event.type == sf::Event::Closed) { //if we want to close the window by clicking the X button
+        } else if(event.type == sf::Event::Closed) {
             window.close(); 
         } 
     }
@@ -159,20 +150,20 @@ void Game::update(float deltaTime) {
         }
     }
 
+    sf::Vector2f camPos = camera.getCenter();
     sf::Vector2u winSize = window.getSize();
-    float left   = playerPos.x - winSize.x / 2.f;
-    float right  = playerPos.x + winSize.x / 2.f;
-    float top    = playerPos.y - winSize.y / 2.f;
-    float bottom = playerPos.y + winSize.y / 2.f;
+    float left   = camPos.x - winSize.x / 2.f;
+    float right  = camPos.x + winSize.x / 2.f;
+    float top    = camPos.y - winSize.y / 2.f;
+    float bottom = camPos.y + winSize.y / 2.f;
 
     // delete trees outside of an extended view area
-    float margin = 300.f;
+    //float margin = 300.f;
     visibleTrees.erase(
         std::remove_if(visibleTrees.begin(), visibleTrees.end(),
-            [left, right, top, bottom, margin](const std::unique_ptr<Tree>& tree) {
+            [left, right, top, bottom](const std::unique_ptr<Tree>& tree) {
                 sf::Vector2f pos = tree->getPosition();
-                return (pos.x < left - margin || pos.x > right + margin ||
-                        pos.y < top - margin  || pos.y > bottom + margin);
+                return !(pos.x >= left && pos.x <= right && pos.y >= top  && pos.y <= bottom);
             }),
         visibleTrees.end()
     );
@@ -182,15 +173,27 @@ void Game::update(float deltaTime) {
     std::uniform_real_distribution<float> distX(left, right);
     std::uniform_real_distribution<float> distY(top, bottom);
 
-    int currentCount     = static_cast<int>(visibleTrees.size());
-    int targetTreeCount  = 3 + (rng() % 3); // 3, 4 or 5 trees
+    int minTrees = 3;
+    int maxTrees = 5;
+    int targetTreeCount  = minTrees + (rng() % maxTrees - minTrees + 1); // random between min and max
+    int tries = 0;
+    int maxTries = 10; // avoid infinite loop
 
-    while (currentCount < targetTreeCount) {
+    while (static_cast<int>(visibleTrees.size()) < targetTreeCount && tries < maxTries) {
         sf::Vector2f newPos(distX(rng), distY(rng));
-        visibleTrees.push_back(
-            std::make_unique<Tree>(newPos, resources.getTexture("tree"))
-        );
-        currentCount++;
+        bool exists = false; // check if a tree already exists at this position with a minimum distance
+        float minDistance = 64.f; // minimum distance between trees
+        for (const auto& tree : visibleTrees) {
+            if (std::abs(tree->getPosition().x - newPos.x) < minDistance &&
+                std::abs(tree->getPosition().y - newPos.y) < minDistance) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            visibleTrees.push_back(std::make_unique<Tree>(newPos, resources.getTexture("tree")));
+        }
+        ++tries;
     }
 
     // debug 
