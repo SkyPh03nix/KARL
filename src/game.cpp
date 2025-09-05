@@ -53,36 +53,38 @@ void Game::initTrees() {
     //TODO save tree positions to file and load from it
 
 
-    //std::ifstream in("gamesave.txt");
-    //std::vector<sf::Vector2f> treePositions;
+    std::ifstream in("gamesave.txt");
+    if (in.is_open()) {
+        float x,y;
+        while (in >> x >> y) {
+            auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"));
+            tree->setScale(3.f, 3.f);
+            visibleTrees.push_back(std::move(tree));
+        }
+        in.close();
+        std::cout << "Loaded " << visibleTrees.size() << " trees from gamesave.txt" << std::endl;
+    } else {
+        std::cout << "Could not open gamesave.txt for reading. Starting with no trees." << std::endl;
+        static std::mt19937 rng(std::random_device{}());
 
-    //float x, y;
-    //while (in >> x >> y) {
-        //treePositions.emplace_back(x, y);
-        //gameObjects.push_back(std::make_unique<Tree>(sf::Vector2f(x, y), resources.getTexture("assets/tree1.png")));
-    //}
-    //in.close();
+        float areaSize = 2000.f; // area in which trees can spawn
+        int TreeCount = 50; // number of trees to spawn
 
-    //std::mt19937 rng(std::random_device{}());
+        std::uniform_real_distribution<float> dist(-areaSize/2.f, areaSize/2.f);
+        for (int i = 0; i < TreeCount; ++i) {
+            sf::Vector2f pos(dist(rng), dist(rng));
+            auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"));
+            tree->setScale(3.f, 3.f);
+            visibleTrees.push_back(std::move(tree));
+        }
 
-    //std::uniform_real_distribution<float> distX(
-    //      camera.getCenter().x - window.getSize().x/2.f, 
-    //      camera.getCenter().x + window.getSize().x/2.f
-    //);
-    //std::uniform_real_distribution<float> distY(
-    //      camera.getCenter().y - window.getSize().y/2.f, 
-    //      camera.getCenter().y + window.getSize().y/2.f
-    //);
-
-    //while (treePositions.size() < 100) {
-    //    treePositions.emplace_back(distX(rng), distY(rng));
-    //}
-
-    //std::ofstream out("gamesave.txt");
-    //for (const auto& pos : treePositions) {
-    //    gameObjects.push_back(std::make_unique<Tree>(pos, resources.getTexture("assets/tree1.png")));
-    //    out << pos.x << " " << pos.y << "\n";
-    //}
+        std::ofstream out("gamesave.txt");
+        for (const auto& tree : visibleTrees) {
+            sf::Vector2f pos = tree->getPosition();
+            out << pos.x << " " << pos.y << "\n";
+        }
+        out.close();
+    }
 }
 
 Game::Game() : portals() {
@@ -149,12 +151,14 @@ void Game::update(float deltaTime) {
         obj->update(deltaTime, window);
     }
     portals.update(deltaTime, window);
-
+    
+    
     if (playerPtr) {
+        // check for portal collisions
         portals.tryTeleport(*playerPtr);
         camera.setCenter(playerPtr->getPosition());
 
-        // Check for portal collisions
+        // check for tree collisions
         for (const auto& tree : visibleTrees) {
             if (playerPtr->getGlobalBounds().intersects(tree->getBounds())) {
                 playerPtr->setPosition(oldPlayerPos); // Revert to old position on collision
@@ -164,62 +168,14 @@ void Game::update(float deltaTime) {
         }
     }
 
-    sf::Vector2f camPos = camera.getCenter();
-    sf::Vector2u winSize = window.getSize();
-    float left   = camPos.x - winSize.x / 2.f;
-    float right  = camPos.x + winSize.x / 2.f;
-    float top    = camPos.y - winSize.y / 2.f;
-    float bottom = camPos.y + winSize.y / 2.f;
-
-    // delete trees outside of an extended view area
-    //float margin = 300.f;
-    visibleTrees.erase(
-        std::remove_if(visibleTrees.begin(), visibleTrees.end(),
-            [left, right, top, bottom](const std::unique_ptr<Tree>& tree) {
-                sf::Vector2f pos = tree->getPosition();
-                return !(pos.x >= left && pos.x <= right && pos.y >= top  && pos.y <= bottom);
-            }),
-        visibleTrees.end()
-    );
-
-    //random values
-    static std::mt19937 rng(std::random_device{}());
-    std::uniform_real_distribution<float> distX(left, right);
-    std::uniform_real_distribution<float> distY(top, bottom);
-
-    int minTrees = 3;
-    int maxTrees = 5;
-    int targetTreeCount  = minTrees + (rng() % (maxTrees - minTrees + 1)); // random between min and max
-    int tries = 0;
-    int maxTries = 10; // avoid infinite loop
-
-    while (static_cast<int>(visibleTrees.size()) < targetTreeCount && tries < maxTries) {
-        sf::Vector2f newPos(distX(rng), distY(rng));
-        bool exists = false; // check if a tree already exists at this position with a minimum distance
-        float minDistance = 64.f; // minimum distance between trees
-        for (const auto& tree : visibleTrees) {
-            if (std::abs(tree->getPosition().x - newPos.x) < minDistance &&
-                std::abs(tree->getPosition().y - newPos.y) < minDistance) {
-                exists = true;
-                break;
-            }
-        }
-        if (!exists) {
-            visibleTrees.push_back(std::make_unique<Tree>(newPos, resources.getTexture("tree")));
-        }
-        ++tries;
-    }
-
-    for (const auto& tree : visibleTrees) {
-        tree->setScale(3.f, 3.f);
-    }
-
+    /*
     // debug 
     std::cout << "Bäume im Sichtfeld: " << visibleTrees.size() << std::endl;
     for (const auto& tree : visibleTrees) {
         sf::Vector2f pos = tree->getPosition();
         std::cout << "   Baum bei (" << pos.x << ", " << pos.y << ")\n";
     }
+    */
 }
 
 void Game::render() {

@@ -3,3 +3,5 @@ todo.txt
 main.exe
 main
 assets/*
+gamesave.txt
+*.txt
