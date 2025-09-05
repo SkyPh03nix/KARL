@@ -49,42 +49,116 @@ void Game::initTextures() {
 }
 
 void Game::initTrees() {
-
-    //TODO save tree positions to file and load from it
-
-
-    std::ifstream in("gamesave.txt");
+    const std::string filename = "gamesave.txt";
+    std::ifstream in(filename);
     if (in.is_open()) {
-        float x,y;
-        while (in >> x >> y) {
-            auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"));
-            tree->setScale(3.f, 3.f);
-            visibleTrees.push_back(std::move(tree));
-        }
         in.close();
-        std::cout << "Loaded " << visibleTrees.size() << " trees from gamesave.txt" << std::endl;
+        loadTreesFromFile(filename);
     } else {
-        std::cout << "Could not open gamesave.txt for reading. Starting with no trees." << std::endl;
+        std::cout << "No save file found, generating new trees." << std::endl;
         static std::mt19937 rng(std::random_device{}());
 
-        float areaSize = 2000.f; // area in which trees can spawn
-        int TreeCount = 50; // number of trees to spawn
+        float areaSize = 2000.f;
+        int treeCount = 50;
+        float minDist = 100.f; // minimum distance between trees and player start
 
-        std::uniform_real_distribution<float> dist(-areaSize/2.f, areaSize/2.f);
-        for (int i = 0; i < TreeCount; ++i) {
-            sf::Vector2f pos(dist(rng), dist(rng));
-            auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"));
-            tree->setScale(3.f, 3.f);
-            visibleTrees.push_back(std::move(tree));
+        std::uniform_real_distribution<float> dist(0, areaSize);
+
+        
+        //get player start position
+        sf::Vector2f playerPos(0.f, 0.f);
+        for (auto& obj : gameObjects) {
+            if (auto* p = dynamic_cast<Player*>(obj.get())) {
+                playerPos = p->getPosition(); break;
+            }
         }
 
-        std::ofstream out("gamesave.txt");
-        for (const auto& tree : visibleTrees) {
-            sf::Vector2f pos = tree->getPosition();
-            out << pos.x << " " << pos.y << "\n";
+        std::vector<sf::Vector2f> positions;
+        int tries = 0;
+        int maxTries = treeCount * 10; // prevent infinite loop
+
+        while ((int)positions.size() < treeCount && tries < maxTries) {
+        sf::Vector2f pos(dist(rng), dist(rng));
+        bool tooClose = false;
+
+        // Abstand zu Spieler prüfen
+        float dxP = pos.x - playerPos.x;
+        float dyP = pos.y - playerPos.y;
+        if (std::sqrt(dxP*dxP + dyP*dyP) < minDist) {
+            tooClose = true;
         }
-        out.close();
+
+        // Abstand zu anderen Bäumen prüfen
+        for (const auto& other : positions) {
+            float dx = pos.x - other.x;
+            float dy = pos.y - other.y;
+            if (std::sqrt(dx*dx + dy*dy) < minDist) {
+                tooClose = true;
+                break;
+            }
+        }
+
+        if (!tooClose) {
+            positions.push_back(pos);
+        }
+
+        ++tries;
     }
+    
+    //sort trees by y for better rendering order
+    std::sort(positions.begin(), positions.end(), [](const sf::Vector2f& a, const sf::Vector2f& b) {
+        return (a.y < b.y) || (a.y == b.y && a.x < b.x);
+    });
+
+    for (const auto& pos : positions) {
+        auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"));
+        tree->setScale(3.f, 3.f);
+        visibleTrees.push_back(std::move(tree));
+    }
+
+    saveTreesToFile(filename);
+    }
+}
+
+
+void Game::loadTreesFromFile(const std::string& filename) {
+    visibleTrees.clear();
+    std::ifstream in(filename);
+    if (!in.is_open()) { 
+        std::cerr << "Could not open " << filename << " for reading!" << std::endl;
+        return;
+    }
+
+    float x,y;
+    while (in >> x >> y) {
+        auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"));
+        tree->setScale(3.f, 3.f);
+        visibleTrees.push_back(std::move(tree));
+    }
+    in.close();
+    std::cout << "Loaded " << visibleTrees.size() << " trees from " << filename << std::endl;
+}
+
+void Game::saveTreesToFile(const std::string& filename) {
+    std::ofstream out(filename);
+    if(!out.is_open()) {
+        std::cerr << "Could not open " << filename << " for writing!" << std::endl;
+        return;
+    }
+
+    std::vector<sf::Vector2f> treePositions;
+    for (const auto& tree : visibleTrees) {
+        treePositions.push_back(tree->getPosition());
+    }
+    std::sort(treePositions.begin(), treePositions.end(), [](const sf::Vector2f& a, const sf::Vector2f& b) {
+        return (a.y < b.y) || (a.y == b.y && a.x < b.x);
+    });
+
+    for (const auto& pos : treePositions) {
+        out << pos.x << " " << pos.y << "\n";
+    }
+    out.close();
+    std::cout << "Saved " << visibleTrees.size() << " trees to " << filename << std::endl;
 }
 
 Game::Game() : portals() {

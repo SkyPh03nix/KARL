@@ -33,6 +33,8 @@ class Game {
         void initBackground();
         void initTextures();
         void initTrees();
+        void loadTreesFromFile(const std::string& filename = "gamesave.txt");
+        void saveTreesToFile(const std::string& filename = "gamesave.txt");
 
         void processEvents();
         void update(float deltaTime);
