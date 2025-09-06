@@ -12,7 +12,6 @@ class Button : public GameObject {
         bool wasClickedLastFrame = false;
 
         bool isMouseOver(const sf::RenderWindow& window) const;
-
     public:
         Button(sf::Vector2f size, sf::Vector2f pos, const std::string& label = "");
 
@@ -20,6 +19,8 @@ class Button : public GameObject {
         void setColor(sf::Color col);
 
         void updateTextColor();
+        sf::FloatRect getBounds() const {return shape.getGlobalBounds();}
+        void click() {if (onClick) onClick();}
 
         void update(float deltaTime, const sf::RenderWindow& window) override;
         void draw(sf::RenderWindow& window) override;

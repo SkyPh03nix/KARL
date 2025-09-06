@@ -5,17 +5,25 @@
 
 class Tree: public GameObject {
     public:
-        Tree(const sf::Vector2f& pos, const sf::Texture& texture);
+        Tree(const sf::Vector2f& pos, const sf::Texture& texture, const sf::Texture& choppedTexture);
 
-        void update(float, const sf::RenderWindow&) override {}
-        void draw(sf::RenderWindow& window) override {window.draw(sprite);}
+        void update(float deltaTime, const sf::RenderWindow&) override;
+        void draw(sf::RenderWindow& window) override;
 
         sf::Vector2f getPosition() const {return position;}
         sf::FloatRect getBounds() const;
 
-        void setScale(float x, float y) {sprite.setScale(x, y);}
+        void chop();
 
+        void setScale(float x, float y);      
     private:
-        sf::Vector2f position;
         sf::Sprite sprite;
+        sf::Sprite choppedSprite; 
+        const sf::Texture& treeTexture;
+        const sf::Texture& choppedTexture;
+        
+        sf::Vector2f position;
+        bool chopped;
+        float respawnTimer;
+        const float respawnTime;
 };

@@ -45,7 +45,7 @@ void Game::initTextures() {
     resources.loadTexture("portal", "assets/used/Portals.png");
     resources.loadTexture("background", "assets/used/grassbg.png");
     resources.loadTexture("tree", "assets/used/tree.png");
-    //std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
+    resources.loadTexture("trunk", "assets/used/stump.png");
 }
 
 void Game::initTrees() {
@@ -64,7 +64,6 @@ void Game::initTrees() {
 
         std::uniform_real_distribution<float> dist(0, areaSize);
 
-        
         //get player start position
         sf::Vector2f playerPos(0.f, 0.f);
         for (auto& obj : gameObjects) {
@@ -111,7 +110,7 @@ void Game::initTrees() {
     });
 
     for (const auto& pos : positions) {
-        auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"));
+        auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"), resources.getTexture("trunk"));
         tree->setScale(3.f, 3.f);
         visibleTrees.push_back(std::move(tree));
     }
@@ -131,7 +130,7 @@ void Game::loadTreesFromFile(const std::string& filename) {
 
     float x,y;
     while (in >> x >> y) {
-        auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"));
+        auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"), resources.getTexture("trunk"));
         tree->setScale(3.f, 3.f);
         visibleTrees.push_back(std::move(tree));
     }
@@ -203,7 +202,34 @@ void Game::processEvents() {
             }
         } else if(event.type == sf::Event::MouseButtonPressed) {
             sf::Vector2f mouseWorld = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-            portals.handleInput(mouseWorld, event.mouseButton.button);
+            bool handled = false;
+
+            //check for Button click:
+            for (auto& obj : gameObjects) {
+                if (auto* btn = dynamic_cast<Button*>(obj.get())) {
+                    if (btn->getBounds().contains(mouseWorld)) {
+                        btn->click();  // Button wurde gedrückt
+                        handled = true;
+                        break;
+                    }
+                }
+            }
+
+            // check for trees
+            if (!handled && event.mouseButton.button == sf::Mouse::Left) {
+                for (auto& tree : visibleTrees) {
+                    if (tree->getBounds().contains(mouseWorld)) {
+                        tree->chop(); // Baum fällen
+                        handled = true;
+                        break;
+                    }
+                }
+            }
+
+            //place portal
+            if(!handled){
+                portals.handleInput(mouseWorld, event.mouseButton.button);
+            }            
         } else if(event.type == sf::Event::Closed) {
             window.close(); 
         } 
@@ -223,6 +249,9 @@ void Game::update(float deltaTime) {
 
     for (auto& obj : gameObjects) {
         obj->update(deltaTime, window);
+    }
+    for (auto& tree : visibleTrees) {
+        tree->update(deltaTime, window);
     }
     portals.update(deltaTime, window);
     
