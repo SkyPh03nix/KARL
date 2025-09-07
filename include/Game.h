@@ -16,7 +16,8 @@ class Game {
     private:
         sf::RenderWindow window;
         sf::Clock clock;
-        sf::View camera;
+        sf::View camera; //camera centered on player
+        sf::View uiView; //view for UI elements (fixed to screen)
 
         ResourceManager resources;
 

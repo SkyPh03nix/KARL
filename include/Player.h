@@ -2,6 +2,7 @@
 
 #include "GameObject.h"
 #include "AnimationManager.h"
+#include "Inventory.h"
 
 class Player : public GameObject {
     private:
@@ -15,7 +16,8 @@ class Player : public GameObject {
         Direction lastDirection = Direction::Down;
 
         float speed;
-        
+        Inventory inventory;
+
         void initAnimationSet(sf::Texture& texture, const std::string& prefix, int frameCount, float frameTime, int directionsCount = 4);
 
     public:
@@ -23,8 +25,11 @@ class Player : public GameObject {
 
         void update(float deltaTime, const sf::RenderWindow& window) override;
         void draw(sf::RenderWindow& window) override;
+
         void setColor(const sf::Color& col);
         void setPosition(const sf::Vector2f& pos);
+
+        Inventory& getInventory() { return inventory; }
         sf::FloatRect getGlobalBounds() const;
         sf::Vector2f getPosition() const {return sprite.getPosition();}
 };

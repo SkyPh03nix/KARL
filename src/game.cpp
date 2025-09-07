@@ -20,6 +20,7 @@ void Game::initObjects() {
     );
 
     //Buttons
+    /*
     sf::Vector2f buttonSize(100.f,50.f);
 
     auto button = std::make_unique<Button>(buttonSize,sf::Vector2f(100,100),"Make Red" ); //TODO fitTextToButton() function
@@ -30,12 +31,13 @@ void Game::initObjects() {
 
     auto button3 = std::make_unique<Button>(buttonSize,sf::Vector2f(100,300),"Reset Color");
     button3->setOnClick([&p = *player](){p.setColor(sf::Color::White);});
+    */
     
     // !!! only do this at end of function (move destroys the local objects) !!!
     gameObjects.push_back(std::move(player));
-    gameObjects.push_back(std::move(button)); 
-    gameObjects.push_back(std::move(button2));
-    gameObjects.push_back(std::move(button3)); 
+    //gameObjects.push_back(std::move(button)); 
+    //gameObjects.push_back(std::move(button2));
+    //gameObjects.push_back(std::move(button3)); 
     //std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
 }
 
@@ -165,7 +167,11 @@ Game::Game() : portals() {
     initTextures();
     initBackground();
     initObjects();
+
     camera.setSize(window.getSize().x, window.getSize().y);
+    uiView.setSize(window.getSize().x, window.getSize().y);
+    uiView.setCenter(window.getSize().x/2.f, window.getSize().y/2.f);
+
     initTrees();
     portals.setTexture(resources.getTexture("portal"));
     //std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
@@ -199,37 +205,66 @@ void Game::processEvents() {
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Escape) {
                 window.close();
+            } else if (event.key.code == sf::Keyboard::Tab) {
+                // Toggle inventory visibility
+                for (auto& obj : gameObjects) {
+                    if (auto* p = dynamic_cast<Player*>(obj.get())) {
+                        p->getInventory().toggleVisibility();
+                        break;
+                    }
+                }
             }
         } else if(event.type == sf::Event::MouseButtonPressed) {
-            sf::Vector2f mouseWorld = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+            sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePos, camera);
+            sf::Vector2f uiMouse = window.mapPixelToCoords(mousePos, uiView);
             bool handled = false;
 
-            //check for Button click:
-            for (auto& obj : gameObjects) {
-                if (auto* btn = dynamic_cast<Button*>(obj.get())) {
-                    if (btn->getBounds().contains(mouseWorld)) {
-                        btn->click();  // Button wurde gedrückt
-                        handled = true;
-                        break;
+            //ui elements first
+            if (event.mouseButton.button == sf::Mouse::Left) {
+                // check inventory
+                for (auto& obj : gameObjects) {
+                    if (auto* p = dynamic_cast<Player*>(obj.get())) {
+                        if (p->getInventory().isVisible() && p->getInventory().containsPoint(uiMouse)) {
+                            p->getInventory().handleClick(uiMouse);
+                            handled = true;
+                            break;
+                        }
+                    }
+                }
+                // check buttons
+                if (!handled) {
+                    for (auto& obj : gameObjects) {
+                        if (auto* btn = dynamic_cast<Button*>(obj.get())) {
+                            sf::FloatRect btnBounds = btn->getBounds();
+                            if (btnBounds.contains(uiMouse)) {
+                                btn->click(); 
+                                handled = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
 
-            // check for trees
-            if (!handled && event.mouseButton.button == sf::Mouse::Left) {
-                for (auto& tree : visibleTrees) {
-                    if (tree->getBounds().contains(mouseWorld)) {
-                        tree->chop(); // Baum fällen
-                        handled = true;
-                        break;
+            // world interactions if not handled by ui
+            if(!handled) {
+                // check for trees
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    for (auto& tree : visibleTrees) {
+                        if (tree->getBounds().contains(mouseWorld)) {
+                            tree->chop();
+                            handled = true;
+                            break;
+                        }
                     }
                 }
-            }
 
-            //place portal
-            if(!handled){
-                portals.handleInput(mouseWorld, event.mouseButton.button);
-            }            
+                //place portal
+                if(!handled){
+                    portals.handleInput(mouseWorld, event.mouseButton.button);
+                }   
+            }                     
         } else if(event.type == sf::Event::Closed) {
             window.close(); 
         } 
@@ -313,23 +348,35 @@ void Game::render() {
     for (auto& obj : gameObjects) {
         obj->draw(window);
         //draw bounds
-        if (Player* player = dynamic_cast<Player*>(obj.get())) { //debug
-        auto pb = player->getGlobalBounds(); //debug
-        sf::RectangleShape r({pb.width, pb.height}); //debug
-        r.setPosition(pb.left, pb.top); //debug
-        r.setFillColor(sf::Color(255, 0, 0, 100)); //debug
-        window.draw(r); //debug
-    }
+        if (Player* player = dynamic_cast<Player*>(obj.get())) {//debug
+            auto pb = player->getGlobalBounds();                //debug
+            sf::RectangleShape r({pb.width, pb.height});        //debug
+            r.setPosition(pb.left, pb.top);                     //debug
+            r.setFillColor(sf::Color(255, 0, 0, 100));          //debug
+            window.draw(r);                                     //debug
+        }
     }
 
     for (const auto& tree : visibleTrees) {
         tree->draw(window);
         //draw bounds
-        auto tb = tree->getBounds(); //debug
-        sf::RectangleShape r({tb.width, tb.height}); //debug
-        r.setPosition(tb.left, tb.top); //debug
-        r.setFillColor(sf::Color(0, 255, 0, 100)); //debug
+        auto tb = tree->getBounds();                            //debug
+        sf::RectangleShape r({tb.width, tb.height});            //debug
+        r.setPosition(tb.left, tb.top);                         //debug
+        r.setFillColor(sf::Color(0, 255, 0, 100));              //debug
         window.draw(r);
+    }
+
+    // draw UI elements like inventory
+    window.setView(uiView);
+
+    for (auto& obj : gameObjects) {
+        if (auto* btn = dynamic_cast<Button*>(obj.get())) {
+            btn->draw(window);
+        }
+        if (auto* p = dynamic_cast<Player*>(obj.get())) {
+            p->getInventory().draw(window);
+        }
     }
 
     window.display();
