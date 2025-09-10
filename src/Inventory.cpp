@@ -114,11 +114,9 @@ void Inventory::handleClick(const sf::Vector2f& mousePos) {
     for (auto& item : items) {
         sf::FloatRect itemBox(x, y, itemSize, itemSize);
         if (itemBox.contains(mousePos)) {
-            item.use();
-            std::cout << "Used item: " << item.getName() << std::endl;
             return;
         }
-
+        //TODO interact with item (e.g., use or drop)
         x += itemSize + padding;
         if (x + itemSize > background.getPosition().x + background.getSize().x) {
             x = background.getPosition().x + padding;

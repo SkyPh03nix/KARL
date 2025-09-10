@@ -2,6 +2,8 @@
 
 #include "GameObject.h"
 #include <SFML/Graphics.hpp>
+#include "Item.h"
+#include <memory>
 
 class Tree: public GameObject {
     public:
@@ -13,7 +15,7 @@ class Tree: public GameObject {
         sf::Vector2f getPosition() const {return position;}
         sf::FloatRect getBounds() const;
 
-        void chop();
+        void chop(std::vector<std::unique_ptr<Item>>& worldItems);
         bool isChopped() const {return chopped;}
 
         void setScale(float x, float y);      

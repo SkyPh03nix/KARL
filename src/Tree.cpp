@@ -1,4 +1,6 @@
 #include "Tree.h"
+#include "RecourceManager.h"
+#include "Game.h"
 
 Tree::Tree(const sf::Vector2f& pos, const sf::Texture& treeTexture, const sf::Texture& choppedTexture)
     : treeTexture(treeTexture), choppedTexture(choppedTexture),
@@ -23,10 +25,12 @@ void Tree::update(float deltaTime, const sf::RenderWindow&) {
     }
 }
 
-void Tree::chop() {
+void Tree::chop(std::vector<std::unique_ptr<Item>>& worldItems) {
     if (!chopped) {
         chopped = true; 
         respawnTimer = 0.f;
+
+        worldItems.push_back(std::make_unique<Item>("Wood", Type::WOOD, 1, true, &treeTexture, position));
     }
 }
 
@@ -44,6 +48,9 @@ void Tree::setScale(float x, float y) {
 }
 
 sf::FloatRect Tree::getBounds() const {
+    if (chopped)  {
+        return sf::FloatRect(0,0,0,0); // No collision when chopped
+    }
     sf::FloatRect bounds = sprite.getGlobalBounds();
 
     float trunkWidth  = bounds.width * 0.1f;

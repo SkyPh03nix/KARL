@@ -9,40 +9,47 @@
 #include "GameObject.h"
 
 enum class Type {
-    WEAPON,
-    ARMOR,
-    CONSUMABLE,
-    RESOURCE
+    WOOD, STONE, APPLE
 };
 
 class Item {
 public:
-    Item(const std::string& name, const std::string description, Type type, sf::Texture* texture, int quantity = 1)
-        : name(name), description(description), type(type), texture(texture), quantity(quantity) {}
+    Item(const std::string& name,Type type, int quantity, bool stackable, const sf::Texture* texture,const sf::Vector2f& position)
+    : name(name), type(type), quantity(quantity),
+      stackable(stackable), texture(texture) {
+        if (texture) sprite.setTexture(*texture);
+        sprite.setPosition(position);
+    }
 
-    void setUseEffect(std::function<void()> effect) {useEffect = effect;}
-    void use() { if(useEffect) useEffect(); }
+    void update(float deltaTime, const sf::RenderWindow& window) {} // TODO animation
+    void draw(sf::RenderWindow& window) { window.draw(sprite); }
+
+    sf::FloatRect getGlobalBounds() const { return sprite.getGlobalBounds(); }
+    sf::Vector2f getPosition() const { return sprite.getPosition(); }
+    //void setUseEffect(std::function<void()> effect) {useEffect = effect;}
+    //void use() { if(useEffect) useEffect(); }
 
     const std::string& getName() const {return name;}
-    const std::string& getDescription() const {return description;}
     Type getType() const {return type;}
-    sf::Texture* getTexture() const {return texture;}
+    const sf::Texture* getTexture() const {return texture;}
     int getQuantity() const {return quantity;}
-    void setQuantity(int qty) {quantity = qty;}
+    //void setQuantity(int qty) {quantity = qty;}
     void addQuantity(int qty) {quantity += qty;}
-
-    bool isStackable() const {return type == Type::CONSUMABLE || type == Type::RESOURCE;}
+    bool isStackable() const {return stackable;}
 
 
 private:
     std::string name;
-    std::string description;
     Type type;
-    sf::Texture* texture;
     int quantity;
-    std::function<void()> useEffect; // Function to define the effect when the item is used
+    bool stackable;
+
+    sf::Sprite sprite;
+    const sf::Texture* texture;
+    //std::function<void()> useEffect; // Function to define the effect when the item is used
 };
 
+/*
 class DroppedItem :public GameObject {
 private:
     Item item;
@@ -87,3 +94,4 @@ private:
     bool isPickedUp() const { return pickedUp; }
     sf::Vector2f getPosition() const { return sprite.getPosition(); }
 };
+*/

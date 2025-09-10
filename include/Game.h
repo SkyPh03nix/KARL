@@ -11,6 +11,8 @@
 
 class Game {
     public:
+    std::vector<std::unique_ptr<Item>> worldItems;
+    ResourceManager resources;
         Game();
         void run();
         void dropItem(const std::string& itemName, const std::string& description, 
@@ -22,7 +24,7 @@ class Game {
         sf::View camera; //camera centered on player
         sf::View uiView; //view for UI elements (fixed to screen)
 
-        ResourceManager resources;
+        
 
         sf::Sprite backgroundSprite;
        
@@ -30,7 +32,7 @@ class Game {
 
         std::vector<std::unique_ptr<Tree>> visibleTrees; 
         std::vector<std::unique_ptr<GameObject>> gameObjects;
-        std::vector<std::unique_ptr<DroppedItem>> droppedItems;
+        
 
         void initWindow();
         void initObjects();
