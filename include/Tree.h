@@ -14,6 +14,7 @@ class Tree: public GameObject {
         sf::FloatRect getBounds() const;
 
         void chop();
+        bool isChopped() const {return chopped;}
 
         void setScale(float x, float y);      
     private:

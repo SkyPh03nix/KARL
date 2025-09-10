@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include "Tree.h"
+#include "Item.h"
 #include "PortalSystem.h"
 #include "RecourceManager.h"
 
@@ -12,7 +13,9 @@ class Game {
     public:
         Game();
         void run();
-
+        void dropItem(const std::string& itemName, const std::string& description, 
+                      Type itemType, const std::string& textureName, 
+                      const sf::Vector2f& position, int quantity);
     private:
         sf::RenderWindow window;
         sf::Clock clock;
@@ -25,15 +28,16 @@ class Game {
        
         PortalSystem portals;
 
-        std::vector<std::unique_ptr<Tree>> visibleTrees;
-        
+        std::vector<std::unique_ptr<Tree>> visibleTrees; 
         std::vector<std::unique_ptr<GameObject>> gameObjects;
+        std::vector<std::unique_ptr<DroppedItem>> droppedItems;
 
         void initWindow();
         void initObjects();
         void initBackground();
         void initTextures();
         void initTrees();
+        void checkItemPickup();
         void loadTreesFromFile(const std::string& filename = "gamesave.txt");
         void saveTreesToFile(const std::string& filename = "gamesave.txt");
 

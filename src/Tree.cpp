@@ -24,8 +24,10 @@ void Tree::update(float deltaTime, const sf::RenderWindow&) {
 }
 
 void Tree::chop() {
-    chopped=true; 
-    respawnTimer=0.f;
+    if (!chopped) {
+        chopped = true; 
+        respawnTimer = 0.f;
+    }
 }
 
 void Tree::draw(sf::RenderWindow& window) {

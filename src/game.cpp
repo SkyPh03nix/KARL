@@ -121,6 +121,57 @@ void Game::initTrees() {
     }
 }
 
+void Game::dropItem(const std::string& itemName, const std::string& description, 
+                   Type itemType, const std::string& textureName,
+                   const sf::Vector2f& position, int quantity) {
+    // Create a small random offset so items don't stack perfectly
+    float offsetX = static_cast<float>(rand() % 20 - 10);
+    float offsetY = static_cast<float>(rand() % 20 - 10);
+    sf::Vector2f dropPosition(position.x + offsetX, position.y + offsetY);
+    
+    // Create the item 
+    Item newItem(itemName, description, itemType, &resources.getTexture(textureName), quantity);
+    
+    // Create a dropped item instance 
+    auto droppedItem = std::make_unique<DroppedItem>(newItem, dropPosition);
+    droppedItems.push_back(std::move(droppedItem));
+}
+
+void Game::checkItemPickup() {
+    Player* playerPtr = nullptr;
+    for (auto& obj : gameObjects) {
+        if (auto* p = dynamic_cast<Player*>(obj.get())) {
+            playerPtr = p;
+            break;
+        }
+    }
+    
+    if (!playerPtr) return;
+    
+    // Get player position
+    sf::Vector2f playerPos = playerPtr->getPosition();
+    
+    // Create a vector to store indices of items that should be removed
+    std::vector<size_t> itemsToRemove;
+    
+    // Check each dropped item
+    for (size_t i = 0; i < droppedItems.size(); ++i) {
+        if (droppedItems[i]->checkPickup(playerPos)) {
+            // Item is picked up, add to inventory
+            playerPtr->getInventory().addItem(droppedItems[i]->getItem());
+            
+            // Mark for removal
+            itemsToRemove.push_back(i);
+            
+            std::cout << "Picked up: " << droppedItems[i]->getItem().getName() << std::endl;
+        }
+    }
+    
+    // Remove picked up items (in reverse order to avoid index issues)
+    for (auto it = itemsToRemove.rbegin(); it != itemsToRemove.rend(); ++it) {
+        droppedItems.erase(droppedItems.begin() + *it);
+    }
+}
 
 void Game::loadTreesFromFile(const std::string& filename) {
     visibleTrees.clear();
@@ -285,13 +336,28 @@ void Game::update(float deltaTime) {
     for (auto& obj : gameObjects) {
         obj->update(deltaTime, window);
     }
-    for (auto& tree : visibleTrees) {
+
+    // Check for item drops
+    for (auto& tree: visibleTrees) {
+        bool wasChopped = tree->isChopped();
         tree->update(deltaTime, window);
+        if (!wasChopped && tree->isChopped()) {
+            // Tree was just chopped, drop wood
+            if (playerPtr) {
+                dropItem("Wood", "A piece of wood.", Type::RESOURCE, "trunk", tree->getPosition(), 1);
+            }
+        }
     }
+    for (auto& item : droppedItems) {
+        item->update(deltaTime, window);
+    }
+
     portals.update(deltaTime, window);
     
-    
     if (playerPtr) {
+        // Check for item pickups
+        checkItemPickup();
+        
         // check for portal collisions
         portals.tryTeleport(*playerPtr);
         camera.setCenter(playerPtr->getPosition());
