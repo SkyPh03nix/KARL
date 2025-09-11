@@ -113,7 +113,7 @@ void Game::initTrees() {
     });
 
     for (const auto& pos : positions) {
-        auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"), resources.getTexture("trunk"));
+        auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"), resources.getTexture("trunk"), resources.getTexture("wood"));
         tree->setScale(3.f, 3.f);
         visibleTrees.push_back(std::move(tree));
     }
@@ -121,18 +121,6 @@ void Game::initTrees() {
     saveTreesToFile(filename);
     }
 }
-
-/*
-void Game::dropItem(const std::string& itemName, const std::string& description, 
-                   Type itemType, const std::string& textureName,
-                   const sf::Vector2f& position, int quantity) {
-    // Create a small random offset so items don't stack perfectly
-    float offsetX = static_cast<float>(rand() % 20 - 10);
-    float offsetY = static_cast<float>(rand() % 20 - 10);
-    sf::Vector2f dropPosition(position.x + offsetX, position.y + offsetY);
-
-
-    }*/
 
 void Game::loadTreesFromFile(const std::string& filename) {
     visibleTrees.clear();
@@ -144,7 +132,7 @@ void Game::loadTreesFromFile(const std::string& filename) {
 
     float x,y;
     while (in >> x >> y) {
-        auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"), resources.getTexture("trunk"));
+        auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"), resources.getTexture("trunk"), resources.getTexture("wood"));
         tree->setScale(3.f, 3.f);
         visibleTrees.push_back(std::move(tree));
     }

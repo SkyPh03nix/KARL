@@ -2,8 +2,8 @@
 #include "RecourceManager.h"
 #include "Game.h"
 
-Tree::Tree(const sf::Vector2f& pos, const sf::Texture& treeTexture, const sf::Texture& choppedTexture)
-    : treeTexture(treeTexture), choppedTexture(choppedTexture),
+Tree::Tree(const sf::Vector2f& pos, const sf::Texture& treeTexture, const sf::Texture& choppedTexture, const sf::Texture& woodTexture)
+    : treeTexture(treeTexture), choppedTexture(choppedTexture), woodTexture(woodTexture),
     position(pos), chopped(false), 
     respawnTimer(0.f), respawnTime(10.f) {
     sprite.setTexture(treeTexture);
@@ -30,7 +30,7 @@ void Tree::chop(std::vector<std::unique_ptr<Item>>& worldItems) {
         chopped = true; 
         respawnTimer = 0.f;
 
-        worldItems.push_back(std::make_unique<Item>("Wood", Type::WOOD, 1, true, &treeTexture, position));
+        worldItems.push_back(std::make_unique<Item>("Wood", Type::WOOD, 1, true, &woodTexture, position));
     }
 }
 
