@@ -53,7 +53,7 @@ void Tree::setScale(float x, float y) {
     choppedSprite.setScale(x, y);
 }
 
-sf::FloatRect Tree::getBounds() const {
+sf::FloatRect Tree::getGlobalBounds() const {
     if (chopped)  {
         return sf::FloatRect(0,0,0,0); // No collision when chopped
     }

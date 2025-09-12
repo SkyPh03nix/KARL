@@ -21,8 +21,8 @@ class Portal : public GameObject {
         bool isActive() {return active;}
         void deactivate() {active = false; animId = -1;}
 
-        const sf::Vector2f& getPosition() const {return sprite.getPosition();}
-        const sf::FloatRect getBounds() const {return sprite.getGlobalBounds();}
+        sf::Vector2f getPosition() const override {return sprite.getPosition();}
+        sf::FloatRect getGlobalBounds() const override {return sprite.getGlobalBounds();}
 
         void draw(sf::RenderWindow& window) {if(active)window.draw(sprite);};
 };

@@ -24,7 +24,7 @@ class Game {
         sf::View camera; //camera centered on player
         sf::View uiView; //view for UI elements (fixed to screen)
 
-        
+        Player* player;
 
         sf::Sprite backgroundSprite;
        
@@ -33,7 +33,6 @@ class Game {
         std::vector<std::unique_ptr<Tree>> visibleTrees; 
         std::vector<std::unique_ptr<GameObject>> gameObjects;
         
-
         void initWindow();
         void initObjects();
         void initBackground();
@@ -42,6 +41,7 @@ class Game {
         void checkItemPickup();
         void loadTreesFromFile(const std::string& filename = "gamesave.txt");
         void saveTreesToFile(const std::string& filename = "gamesave.txt");
+        void resolveCollisions(const sf::Vector2f& oldPos, const std::vector<GameObject*>& blockers);
 
         void processEvents();
         void update(float deltaTime);

@@ -12,8 +12,8 @@ class Tree: public GameObject {
         void update(float deltaTime, const sf::RenderWindow&) override;
         void draw(sf::RenderWindow& window) override;
 
-        sf::Vector2f getPosition() const {return position;}
-        sf::FloatRect getBounds() const;
+        sf::Vector2f getPosition() const override {return position;}
+        sf::FloatRect getGlobalBounds() const override;
 
         void chop(std::vector<std::unique_ptr<Item>>& worldItems);
         bool isChopped() const {return chopped;}

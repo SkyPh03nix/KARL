@@ -12,33 +12,14 @@
 
 void Game::initObjects() {
     //Player
-    auto player = std::make_unique<Player>(
+    auto playerObj = std::make_unique<Player>(
         resources.getTexture("player_walk"),
         resources.getTexture("player_idle"),
         sf::Vector2f(window.getSize().x/2.f-32.f, window.getSize().y/2.f-32.f),
         300.f
     );
-
-    //Buttons
-    /*
-    sf::Vector2f buttonSize(100.f,50.f);
-
-    auto button = std::make_unique<Button>(buttonSize,sf::Vector2f(100,100),"Make Red" ); //TODO fitTextToButton() function
-    button->setOnClick([&p = *player](){p.setColor(sf::Color::Red);});
-    
-    auto button2 = std::make_unique<Button>(buttonSize,sf::Vector2f(100,200),"Make Green");
-    button2->setOnClick([&p = *player](){p.setColor(sf::Color::Green);});
-
-    auto button3 = std::make_unique<Button>(buttonSize,sf::Vector2f(100,300),"Reset Color");
-    button3->setOnClick([&p = *player](){p.setColor(sf::Color::White);});
-    */
-    
-    // !!! only do this at end of function (move destroys the local objects) !!!
-    gameObjects.push_back(std::move(player));
-    //gameObjects.push_back(std::move(button)); 
-    //gameObjects.push_back(std::move(button2));
-    //gameObjects.push_back(std::move(button3)); 
-    //std::cout << __PRETTY_FUNCTION__ << std::endl; //debug
+    player = playerObj.get();
+    gameObjects.push_back(std::move(playerObj));
 }
 
 void Game::initTextures() {
@@ -254,7 +235,7 @@ void Game::processEvents() {
                 // check for trees
                 if (event.mouseButton.button == sf::Mouse::Left) {
                     for (auto& tree : visibleTrees) {
-                        if (tree->getBounds().contains(mouseWorld)) {
+                        if (tree->getGlobalBounds().contains(mouseWorld)) {
                             tree->chop(worldItems);
                             handled = true;
                             break;
@@ -290,57 +271,60 @@ void Game::checkItemPickup() {
 }
 
 void Game::update(float deltaTime) {
-    //find player
-    Player* playerPtr = nullptr;
-    for (auto& obj : gameObjects) {
-        if (auto* p = dynamic_cast<Player*>(obj.get())) {
-            playerPtr = p;
-            break;
-        }
-    }
+    sf::Vector2f oldPlayerPos = player ? player->getPosition() : sf::Vector2f(0.f, 0.f);
 
-    sf::Vector2f oldPlayerPos = playerPtr ? playerPtr->getPosition() : sf::Vector2f(0.f, 0.f);
-
-    for (auto& obj : gameObjects) {
-        obj->update(deltaTime, window);
-    }
-
-    for (auto& tree : visibleTrees) {
-        tree->update(deltaTime, window);
-    }
-
-    for (auto& item : worldItems) {
-        item->update(deltaTime, window);
-    }
+    for (auto& obj : gameObjects) {obj->update(deltaTime, window);}
+    for (auto& tree : visibleTrees) {tree->update(deltaTime, window);}
+    for (auto& item : worldItems) {item->update(deltaTime, window);}
 
     portals.update(deltaTime, window);
     
-    if (playerPtr) {
-        // Check for item pickups
+    if (player) {
         checkItemPickup();
         
-        // check for portal collisions
-        portals.tryTeleport(*playerPtr);
-        camera.setCenter(playerPtr->getPosition());
+        portals.tryTeleport(*player);
+        
 
-        // check for tree collisions
+        //add colision objects to resolve 
+        std::vector<GameObject*> blockers;
         for (const auto& tree : visibleTrees) {
-            if (playerPtr->getGlobalBounds().intersects(tree->getBounds())) {
-                playerPtr->setPosition(oldPlayerPos); // Revert to old position on collision
-                camera.setCenter(oldPlayerPos);
-                break;
+            if (!tree->isChopped()) {
+                blockers.push_back(tree.get());
             }
         }
+        resolveCollisions(oldPlayerPos, blockers);
+        camera.setCenter(player->getPosition());
     }
+}
 
-    /*
-    // debug 
-    std::cout << "Bäume im Sichtfeld: " << visibleTrees.size() << std::endl;
-    for (const auto& tree : visibleTrees) {
-        sf::Vector2f pos = tree->getPosition();
-        std::cout << "   Baum bei (" << pos.x << ", " << pos.y << ")\n";
+void Game::resolveCollisions(const sf::Vector2f& oldPos, const std::vector<GameObject*>& blockers) {
+    // Speichere die Zielposition nach Movement
+    sf::Vector2f targetPos = player->getPosition();
+
+    // 1. X-Richtung testen (Y bleibt alt)
+    player->setPosition(sf::Vector2f(targetPos.x, oldPos.y));
+    bool collisionX = false;
+    for (const auto* blocker : blockers) {
+        if (player->getGlobalBounds().intersects(blocker->getGlobalBounds())) {
+            collisionX = true;
+            break;
+        }
     }
-    */
+    float finalX = collisionX ? oldPos.x : targetPos.x;
+
+    // 2. Y-Richtung testen (X ist jetzt finalX, Y ist die neue Zielposition!)
+    player->setPosition(sf::Vector2f(finalX, targetPos.y));
+    bool collisionY = false;
+    for (const auto* blocker : blockers) {
+        if (player->getGlobalBounds().intersects(blocker->getGlobalBounds())) {
+            collisionY = true;
+            break;
+        }
+    }
+    float finalY = collisionY ? oldPos.y : targetPos.y;
+
+    // Endgültige Position setzen
+    player->setPosition(sf::Vector2f(finalX, finalY));
 }
 
 void Game::render() {
@@ -397,7 +381,7 @@ void Game::render() {
     for (const auto& tree : visibleTrees) {
         tree->draw(window);
         //draw bounds
-        auto tb = tree->getBounds();                            //debug
+        auto tb = tree->getGlobalBounds();                            //debug
         sf::RectangleShape r({tb.width, tb.height});            //debug
         r.setPosition(tb.left, tb.top);                         //debug
         r.setFillColor(sf::Color(0, 255, 0, 100));              //debug

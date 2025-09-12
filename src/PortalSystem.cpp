@@ -46,8 +46,8 @@ void PortalSystem::tryTeleport(Player& player) {
     if (cooldownTimer > 0.f)
         return;
 
-    bool onP1 = player.getGlobalBounds().intersects(p1.getBounds());
-    bool onP2 = player.getGlobalBounds().intersects(p2.getBounds());
+    bool onP1 = player.getGlobalBounds().intersects(p1.getGlobalBounds());
+    bool onP2 = player.getGlobalBounds().intersects(p2.getGlobalBounds());
 
     if (onP1 && portalOnCooldown != &p1) {
         if(!p2.isActive()) return;
