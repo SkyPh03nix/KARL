@@ -7,7 +7,7 @@
 
 class Tree: public GameObject {
     public:
-        Tree(const sf::Vector2f& pos, const sf::Texture& texture, const sf::Texture& choppedTexture, const sf::Texture& woodTexture);
+        Tree(const sf::Vector2f& pos, const sf::Texture& texture, const sf::Texture& choppedTexture, const sf::Texture& woodTexture, const sf::Texture& saplingTexture, const sf::Texture& appleTexture);
 
         void update(float deltaTime, const sf::RenderWindow&) override;
         void draw(sf::RenderWindow& window) override;
@@ -25,6 +25,8 @@ class Tree: public GameObject {
         const sf::Texture& treeTexture;
         const sf::Texture& choppedTexture;
         const sf::Texture& woodTexture;
+        const sf::Texture& saplingTexture;
+        const sf::Texture& appleTexture;
         
         sf::Vector2f position;
         bool chopped;

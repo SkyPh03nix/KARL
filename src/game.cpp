@@ -49,6 +49,8 @@ void Game::initTextures() {
     resources.loadTexture("tree", "assets/used/tree.png");
     resources.loadTexture("trunk", "assets/used/stump.png");
     resources.loadTexture("wood", "assets/used/wood.png");
+    resources.loadTexture("sapling", "assets/used/placeholder.png");
+    resources.loadTexture("apple", "assets/used/placeholder2.png");
 }
 
 void Game::initTrees() {
@@ -113,7 +115,7 @@ void Game::initTrees() {
     });
 
     for (const auto& pos : positions) {
-        auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"), resources.getTexture("trunk"), resources.getTexture("wood"));
+        auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"), resources.getTexture("trunk"), resources.getTexture("wood"), resources.getTexture("sapling"), resources.getTexture("apple"));
         tree->setScale(3.f, 3.f);
         visibleTrees.push_back(std::move(tree));
     }
@@ -132,7 +134,7 @@ void Game::loadTreesFromFile(const std::string& filename) {
 
     float x,y;
     while (in >> x >> y) {
-        auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"), resources.getTexture("trunk"), resources.getTexture("wood"));
+        auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"), resources.getTexture("trunk"), resources.getTexture("wood"), resources.getTexture("sapling"), resources.getTexture("apple"));
         tree->setScale(3.f, 3.f);
         visibleTrees.push_back(std::move(tree));
     }
@@ -288,6 +290,7 @@ void Game::checkItemPickup() {
 }
 
 void Game::update(float deltaTime) {
+    //find player
     Player* playerPtr = nullptr;
     for (auto& obj : gameObjects) {
         if (auto* p = dynamic_cast<Player*>(obj.get())) {
@@ -300,6 +303,10 @@ void Game::update(float deltaTime) {
 
     for (auto& obj : gameObjects) {
         obj->update(deltaTime, window);
+    }
+
+    for (auto& tree : visibleTrees) {
+        tree->update(deltaTime, window);
     }
 
     for (auto& item : worldItems) {

@@ -2,9 +2,9 @@
 #include "RecourceManager.h"
 #include "Game.h"
 
-Tree::Tree(const sf::Vector2f& pos, const sf::Texture& treeTexture, const sf::Texture& choppedTexture, const sf::Texture& woodTexture)
-    : treeTexture(treeTexture), choppedTexture(choppedTexture), woodTexture(woodTexture),
-    position(pos), chopped(false), 
+Tree::Tree(const sf::Vector2f& pos, const sf::Texture& treeTexture, const sf::Texture& choppedTexture, const sf::Texture& woodTexture, const sf::Texture& saplingTexture, const sf::Texture& appleTexture)
+    : treeTexture(treeTexture), choppedTexture(choppedTexture), woodTexture(woodTexture), saplingTexture(saplingTexture), appleTexture(appleTexture),
+    position(pos), chopped(false),
     respawnTimer(0.f), respawnTime(10.f) {
     sprite.setTexture(treeTexture);
     sprite.setPosition(position);
@@ -31,6 +31,12 @@ void Tree::chop(std::vector<std::unique_ptr<Item>>& worldItems) {
         respawnTimer = 0.f;
 
         worldItems.push_back(std::make_unique<Item>("Wood", Type::WOOD, 1, true, &woodTexture, position));
+        if(rand() % 100 < 30) { // 30% chance to drop a sapling
+            worldItems.push_back(std::make_unique<Item>("Sapling", Type::SAPLING, 1, true, &saplingTexture, position + sf::Vector2f(10.f, 0.f)));
+        }
+        if(rand() % 100 < 20) { // 20% chance to drop an apple
+            worldItems.push_back(std::make_unique<Item>("Apple", Type::APPLE, 1, true, &appleTexture, position + sf::Vector2f(10.f, 0.f)));
+        }
     }
 }
 

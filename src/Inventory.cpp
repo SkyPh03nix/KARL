@@ -102,8 +102,11 @@ void Inventory::draw(sf::RenderWindow& window) {
     }
 }
 
+
 void Inventory::handleClick(const sf::Vector2f& mousePos) {
     if (!visible) return;
+    //TODO
+    /*
     if  (!background.getGlobalBounds().contains(mousePos)) return;
 
     float padding = 10.f;
@@ -122,5 +125,6 @@ void Inventory::handleClick(const sf::Vector2f& mousePos) {
             x = background.getPosition().x + padding;
             y += itemSize + padding;
         }
-    }
+    }*/
 }
+    
