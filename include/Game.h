@@ -8,6 +8,7 @@
 #include "Item.h"
 #include "PortalSystem.h"
 #include "RecourceManager.h"
+#include "Sapling.h"
 
 class Game {
     public:
@@ -30,7 +31,8 @@ class Game {
        
         PortalSystem portals;
 
-        std::vector<std::unique_ptr<Tree>> visibleTrees; 
+        std::vector<std::unique_ptr<Tree>> visibleTrees;
+        std::vector<std::unique_ptr<Sapling>> saplings; 
         std::vector<std::unique_ptr<GameObject>> gameObjects;
         
         void initWindow();

@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Button.h"
 #include "Tree.h"
+#include "Item.h"
 #include "RecourceManager.h"
 
 #include <iostream>
@@ -9,6 +10,8 @@
 #include <cmath>
 #include <random>
 #include <memory>
+
+enum class Type;
 
 void Game::initObjects() {
     //Player
@@ -185,65 +188,50 @@ void Game::initBackground() {
 void Game::processEvents() {
     sf::Event event;
     while (window.pollEvent(event)) {
+        // --- KEYS ---
         if (event.type == sf::Event::KeyPressed) {
             if (event.key.code == sf::Keyboard::Escape) {
                 window.close();
             } else if (event.key.code == sf::Keyboard::Tab) {
-                // Toggle inventory visibility
-                for (auto& obj : gameObjects) {
-                    if (auto* p = dynamic_cast<Player*>(obj.get())) {
-                        p->getInventory().toggleVisibility();
-                        break;
-                    }
-                }
+                player->getInventory().toggleVisibility();
             }
+
+        // --- MOUSE ---
         } else if(event.type == sf::Event::MouseButtonPressed) {
             sf::Vector2i mousePos = sf::Mouse::getPosition(window);
             sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePos, camera);
             sf::Vector2f uiMouse = window.mapPixelToCoords(mousePos, uiView);
+
             bool handled = false;
 
-            //ui elements first
+            // UI interaction first
             if (event.mouseButton.button == sf::Mouse::Left) {
-                // check inventory
-                for (auto& obj : gameObjects) {
-                    if (auto* p = dynamic_cast<Player*>(obj.get())) {
-                        if (p->getInventory().isVisible() && p->getInventory().containsPoint(uiMouse)) {
-                            p->getInventory().handleClick(uiMouse);
-                            handled = true;
-                            break;
-                        }
-                    }
+                if (player->getInventory().isVisible() && player->getInventory().containsPoint(uiMouse)) {
+                    player->getInventory().handleClick(uiMouse);
+                    handled = true;
                 }
-                // check buttons
-                if (!handled) {
-                    for (auto& obj : gameObjects) {
-                        if (auto* btn = dynamic_cast<Button*>(obj.get())) {
-                            sf::FloatRect btnBounds = btn->getBounds();
-                            if (btnBounds.contains(uiMouse)) {
-                                btn->click(); 
-                                handled = true;
-                                break;
-                            }
-                        }
-                    }
-                }
+                // put button logic here
             }
 
-            // world interactions if not handled by ui
-            if(!handled) {
-                // check for trees
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    for (auto& tree : visibleTrees) {
-                        if (tree->getGlobalBounds().contains(mouseWorld)) {
-                            tree->chop(worldItems);
-                            handled = true;
-                            break;
-                        }
+            // World interactions if not handled by ui
+            if(!handled && event.mouseButton.button == sf::Mouse::Left) {
+                //chop trees
+                for (auto& tree : visibleTrees) {
+                    if (tree->getGlobalBounds().contains(mouseWorld)) {
+                        tree->chop(worldItems);
+                        handled = true;
+                        break;
                     }
                 }
 
-                //place portal
+                //plant saplings
+                if (!handled && player->getInventory().getResourceQuantity(Type::SAPLING) > 0) {
+                    saplings.push_back(std::make_unique<Sapling>(mouseWorld, resources.getTexture("sapling")));
+                    player->getInventory().removeItem(Type::SAPLING, 1);
+                    handled = true;
+                }
+
+                //place portal when no other element was clicked on
                 if(!handled){
                     portals.handleInput(mouseWorld, event.mouseButton.button);
                 }   
@@ -276,6 +264,19 @@ void Game::update(float deltaTime) {
     for (auto& obj : gameObjects) {obj->update(deltaTime, window);}
     for (auto& tree : visibleTrees) {tree->update(deltaTime, window);}
     for (auto& item : worldItems) {item->update(deltaTime, window);}
+    for (auto it = saplings.begin(); it != saplings.end(); ) {
+        (*it)->update(deltaTime, window);
+        if ((*it)->isReadyToBecomeTree()) {
+            // Sapling wird zu Baum
+            visibleTrees.push_back(std::make_unique<Tree>(
+                (*it)->getPosition(),
+                resources.getTexture("tree"),resources.getTexture("trunk"),resources.getTexture("wood"),resources.getTexture("sapling"),resources.getTexture("apple")
+            ));
+            it = saplings.erase(it);
+        } else {
+            ++it;
+        }
+    }
 
     portals.update(deltaTime, window);
     
@@ -387,6 +388,8 @@ void Game::render() {
         r.setFillColor(sf::Color(0, 255, 0, 100));              //debug
         window.draw(r);
     }
+
+    for (auto& sapling : saplings) sapling->draw(window);
 
     // draw UI elements like inventory
     window.setView(uiView);

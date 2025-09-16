@@ -31,9 +31,9 @@ bool Inventory::addItem(const Item& item) {
     }
 }
 
-bool Inventory::removeItem(const std::string& itemName, int quantity) {
+bool Inventory::removeItem(const Type& type, int quantity) {
     for (auto it = items.begin(); it != items.end(); ++it) {
-        if (it->getName() == itemName) {
+        if (it->getType() == type) {
             if (it->getQuantity() > quantity) {
                 it->addQuantity(-quantity);
                 return true;
@@ -102,6 +102,15 @@ void Inventory::draw(sf::RenderWindow& window) {
     }
 }
 
+int Inventory::getResourceQuantity(const Type& type) const {
+    int total = 0;
+    for (const auto& item : items) {
+        if (item.getType() == type) {
+            total += item.getQuantity();
+        }
+    }
+    return total;
+}
 
 void Inventory::handleClick(const sf::Vector2f& mousePos) {
     if (!visible) return;

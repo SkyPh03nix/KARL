@@ -10,7 +10,7 @@ public:
     Inventory(unsigned int cap = 64);
 
     bool addItem(const Item& item);
-    bool removeItem(const std::string& itemName, int quantity);
+    bool removeItem(const Type& type, int quantity);
     Item* getItem(const std::string& itemName);
     const std::vector<Item>& getItems() const { return items; }
 
@@ -22,7 +22,7 @@ public:
     bool containsPoint(const sf::Vector2f& point) const {return visible && background.getGlobalBounds().contains(point);}
 
     bool addResource(const std::string& name, int quantity);
-    int getResourceQuantity(const std::string& name) const;
+    int getResourceQuantity(const Type& type) const;
 private:
     std::vector<Item> items;
     unsigned int capacity = 64;
