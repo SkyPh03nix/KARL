@@ -42,7 +42,7 @@ void Game::initTrees() {
     std::ifstream in(filename);
     if (in.is_open()) {
         in.close();
-        loadTreesFromFile(filename);
+        loadFromFile(filename);
     } else {
         std::cout << "No save file found, generating new trees." << std::endl;
         static std::mt19937 rng(std::random_device{}());
@@ -104,10 +104,11 @@ void Game::initTrees() {
         visibleTrees.push_back(std::move(tree));
     }
 
-    saveTreesToFile(filename);
+    saveToFile(filename);
     }
 }
 
+/*
 void Game::loadTreesFromFile(const std::string& filename) {
     visibleTrees.clear();
     std::ifstream in(filename);
@@ -125,7 +126,105 @@ void Game::loadTreesFromFile(const std::string& filename) {
     in.close();
     std::cout << "Loaded " << visibleTrees.size() << " trees from " << filename << std::endl;
 }
+*/
+void Game::loadFromFile(const std::string& filename) {
+    visibleTrees.clear();
+    saplings.clear();
+    if (player) player->getInventory().clear();
 
+    std::ifstream in(filename);
+    if (!in.is_open()) {
+        std::cerr << "Could not open " << filename << " for reading!" << std::endl;
+        return;
+    }
+
+    std::string type;
+    while (in >> type) {
+        if (type == "PLAYER") {
+            float x, y;
+            in >> x >> y;
+            if (player) player->setPosition(sf::Vector2f(x, y));
+            //TODO load player stats
+        }else if (type == "ITEM") {
+            std::string name;
+            int typeInt, quantity;
+            in >> name >> typeInt >> quantity;
+            if (player) {
+                Item item(name, static_cast<Type>(typeInt), quantity, true, &resources.getTexture(name), sf::Vector2f(0,0));
+                player->getInventory().addItem(item);
+            }
+        } else if (type == "TREE") {
+            float x, y;
+            in >> x >> y;
+            auto tree = std::make_unique<Tree>(
+                sf::Vector2f(x, y),
+                resources.getTexture("tree"),
+                resources.getTexture("trunk"),
+                resources.getTexture("wood"),
+                resources.getTexture("sapling"),
+                resources.getTexture("apple")
+            );
+            tree->setScale(3.f, 3.f);
+            visibleTrees.push_back(std::move(tree));
+        } else if (type == "SAPLING") {
+            float x, y;
+            int state;
+            in >> x >> y >> state;
+            saplings.push_back(std::make_unique<Sapling>(
+                sf::Vector2f(x, y),
+                resources.getTexture("sapling"),
+                state
+            ));
+        }
+    }
+    in.close();
+    std::cout << "Game loaded from " << filename << std::endl;
+}
+
+void Game::saveToFile(const std::string& filename) {
+    std::ofstream out(filename);
+    if (!out.is_open()) {
+        std::cerr << "Could not open " << filename << " for writing!" << std::endl;
+        return;
+    }
+
+    if (player) {
+        sf::Vector2f pos = player->getPosition();
+        out << "PLAYER " << pos.x << " " << pos.y << "\n";
+
+        // TODO Save player stats
+
+        // Save Inventory
+        for (const auto& item : player->getInventory().getItems()) {
+            out << "ITEM " << item.getName() << " " << static_cast<int>(item.getType()) << " " << item.getQuantity() << "\n";
+        }
+    }
+
+    // Save trees
+    std::vector<sf::Vector2f> treePositions;
+    for (const auto& tree : visibleTrees) {
+        treePositions.push_back(tree->getPosition());
+    }
+    std::sort(treePositions.begin(), treePositions.end(), [](const sf::Vector2f& a, const sf::Vector2f& b) {
+        return (a.y < b.y) || (a.y == b.y && a.x < b.x);
+    });
+
+    for (const auto& pos : treePositions) {
+        out << "TREE " << pos.x << " " << pos.y << "\n";
+    }
+
+    // Save saplings
+    for (const auto& sapling : saplings) {
+        sf::Vector2f pos = sapling->getPosition();
+        int state = sapling->getGrowthState();
+        out << "SAPLING " << pos.x << " " << pos.y << " " << state << "\n";
+    }
+
+    out.close();
+    std::cout << "Game saved to " << filename << std::endl;
+}
+
+/*
 void Game::saveTreesToFile(const std::string& filename) {
     std::ofstream out(filename);
     if(!out.is_open()) {
@@ -147,6 +246,7 @@ void Game::saveTreesToFile(const std::string& filename) {
     out.close();
     std::cout << "Saved " << visibleTrees.size() << " trees to " << filename << std::endl;
 }
+*/
 
 Game::Game() : portals() {
     initWindow();

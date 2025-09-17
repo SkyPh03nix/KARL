@@ -13,6 +13,7 @@ public:
     bool removeItem(const Type& type, int quantity);
     Item* getItem(const std::string& itemName);
     const std::vector<Item>& getItems() const { return items; }
+    void clear() { items.clear(); }
 
     void toggleVisibility() { visible = !visible; }
     bool isVisible() const { return visible; }

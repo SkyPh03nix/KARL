@@ -41,8 +41,9 @@ class Game {
         void initTextures();
         void initTrees();
         void checkItemPickup();
-        void loadTreesFromFile(const std::string& filename = "gamesave.txt");
-        void saveTreesToFile(const std::string& filename = "gamesave.txt");
+        //void loadTreesFromFile(const std::string& filename = "gamesave.txt");
+        void saveToFile(const std::string& filename = "gamesave.txt");
+        void loadFromFile(const std::string& filename);
         void resolveCollisions(const sf::Vector2f& oldPos, const std::vector<GameObject*>& blockers);
 
         void processEvents();
