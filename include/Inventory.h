@@ -1,18 +1,21 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 #include <functional>
 #include "Item.h"
+#include "Hotbar.h"
 
 class Inventory {
 public:
+    Hotbar hotbar;
 
     Inventory(unsigned int cap = 64);
 
     bool addItem(const Item& item);
     bool removeItem(const Type& type, int quantity);
     Item* getItem(const std::string& itemName);
-    const std::vector<Item>& getItems() const { return items; }
+    std::vector<std::unique_ptr<Item>>& getItems() {return items; }
     void clear() { items.clear(); }
 
     void toggleVisibility() { visible = !visible; }
@@ -24,8 +27,13 @@ public:
 
     bool addResource(const std::string& name, int quantity);
     int getResourceQuantity(const Type& type) const;
+    unsigned int getCapacity() const { return capacity; }
+    unsigned int getStackLimit(Type type) const;
+
+    sf::FloatRect getGlobalBounds() const {return background.getGlobalBounds();}
+
 private:
-    std::vector<Item> items;
+    std::vector<std::unique_ptr<Item>> items;
     unsigned int capacity = 64;
     bool visible = false; // Inventory UI visibility
     sf::RectangleShape background;

@@ -99,8 +99,7 @@ void Game::initTrees() {
     });
 
     for (const auto& pos : positions) {
-        auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"), resources.getTexture("trunk"), resources.getTexture("wood"), resources.getTexture("sapling"), resources.getTexture("apple"));
-        tree->setScale(3.f, 3.f);
+        auto tree = std::make_unique<Tree>(pos, resources.getTexture("tree"), resources.getTexture("trunk"), resources.getTexture("wood"), resources.getTexture("sapling"), resources.getTexture("apple")); 
         visibleTrees.push_back(std::move(tree));
     }
 
@@ -108,25 +107,6 @@ void Game::initTrees() {
     }
 }
 
-/*
-void Game::loadTreesFromFile(const std::string& filename) {
-    visibleTrees.clear();
-    std::ifstream in(filename);
-    if (!in.is_open()) { 
-        std::cerr << "Could not open " << filename << " for reading!" << std::endl;
-        return;
-    }
-
-    float x,y;
-    while (in >> x >> y) {
-        auto tree = std::make_unique<Tree>(sf::Vector2f(x,y), resources.getTexture("tree"), resources.getTexture("trunk"), resources.getTexture("wood"), resources.getTexture("sapling"), resources.getTexture("apple"));
-        tree->setScale(3.f, 3.f);
-        visibleTrees.push_back(std::move(tree));
-    }
-    in.close();
-    std::cout << "Loaded " << visibleTrees.size() << " trees from " << filename << std::endl;
-}
-*/
 void Game::loadFromFile(const std::string& filename) {
     visibleTrees.clear();
     saplings.clear();
@@ -164,7 +144,6 @@ void Game::loadFromFile(const std::string& filename) {
                 resources.getTexture("sapling"),
                 resources.getTexture("apple")
             );
-            tree->setScale(3.f, 3.f);
             visibleTrees.push_back(std::move(tree));
         } else if (type == "SAPLING") {
             float x, y;
@@ -196,7 +175,7 @@ void Game::saveToFile(const std::string& filename) {
 
         // Save Inventory
         for (const auto& item : player->getInventory().getItems()) {
-            out << "ITEM " << item.getName() << " " << static_cast<int>(item.getType()) << " " << item.getQuantity() << "\n";
+            out << "ITEM " << item->getName() << " " << static_cast<int>(item->getType()) << " " << item->getQuantity() << "\n";
         }
     }
 
@@ -223,30 +202,6 @@ void Game::saveToFile(const std::string& filename) {
     out.close();
     std::cout << "Game saved to " << filename << std::endl;
 }
-
-/*
-void Game::saveTreesToFile(const std::string& filename) {
-    std::ofstream out(filename);
-    if(!out.is_open()) {
-        std::cerr << "Could not open " << filename << " for writing!" << std::endl;
-        return;
-    }
-
-    std::vector<sf::Vector2f> treePositions;
-    for (const auto& tree : visibleTrees) {
-        treePositions.push_back(tree->getPosition());
-    }
-    std::sort(treePositions.begin(), treePositions.end(), [](const sf::Vector2f& a, const sf::Vector2f& b) {
-        return (a.y < b.y) || (a.y == b.y && a.x < b.x);
-    });
-
-    for (const auto& pos : treePositions) {
-        out << pos.x << " " << pos.y << "\n";
-    }
-    out.close();
-    std::cout << "Saved " << visibleTrees.size() << " trees to " << filename << std::endl;
-}
-*/
 
 Game::Game() : portals() {
     initWindow();
@@ -343,18 +298,69 @@ void Game::processEvents() {
 }
 
 void Game::checkItemPickup() {
-    for (auto& obj : gameObjects) {
-        if (auto* player = dynamic_cast<Player*>(obj.get())) {
-            for (auto it = worldItems.begin(); it != worldItems.end();) {
-                if (player->getGlobalBounds().intersects((*it)->getGlobalBounds())) {
-                    player->getInventory().addItem(*(*it));
-                    it = worldItems.erase(it);
-                } else {
-                    ++it;
+    if (!player) return;
+
+    Inventory& inv = player->getInventory();
+    Hotbar& hotbar = player->getHotbar();
+
+    for (auto it = worldItems.begin(); it != worldItems.end();) {
+        Item& item = *(*it);
+
+        // 1. Stacken im Inventar, falls Item schon existiert
+        bool stacked = false;
+        for (auto& invItem : inv.getItems()) {
+            if (invItem->getType() == item.getType()) {
+                invItem->addQuantity(item.getQuantity());
+                // Hotbar-Slot auf dieses Item setzen, falls noch nicht vorhanden
+                bool inHotbar = false;
+                for (int i = 0; i < hotbar.getSlotCount(); ++i) {
+                    if (hotbar.getSlot(i) == invItem.get()) {
+                        inHotbar = true;
+                        break;
+                    }
+                }
+                if (!inHotbar) {
+                    // Freien Slot suchen
+                    for (int i = 0; i < hotbar.getSlotCount(); ++i) {
+                        if (hotbar.getSlot(i) == nullptr) {
+                            hotbar.setSlot(i, invItem.get());
+                            break;
+                        }
+                    }
+                }
+                stacked = true;
+                break;
+            }
+        }
+        if (stacked) {
+            it = worldItems.erase(it);
+            continue;
+        }
+
+        // 2. Item existiert noch nicht: Prüfe, ob Inventar Platz hat
+        if (inv.getItems().size() < inv.getCapacity()) {
+            // Freien Hotbar-Slot suchen
+            bool placedInHotbar = false;
+            for (int i = 0; i < hotbar.getSlotCount(); ++i) {
+                if (hotbar.getSlot(i) == nullptr) {
+                    inv.addItem(item);
+                    hotbar.setSlot(i, inv.getItems().back().get());
+                    placedInHotbar = true;
+                    break;
                 }
             }
-            break;
+            if (placedInHotbar) {
+                it = worldItems.erase(it);
+                continue;
+            }
+            // No space in hotbar
+            inv.addItem(item);
+            it = worldItems.erase(it);
+            continue;
         }
+
+        // No space in inventory
+        ++it;
     }
 }
 
@@ -482,7 +488,7 @@ void Game::render() {
     for (const auto& tree : visibleTrees) {
         tree->draw(window);
         //draw bounds
-        auto tb = tree->getGlobalBounds();                            //debug
+        auto tb = tree->getGlobalBounds();                      //debug
         sf::RectangleShape r({tb.width, tb.height});            //debug
         r.setPosition(tb.left, tb.top);                         //debug
         r.setFillColor(sf::Color(0, 255, 0, 100));              //debug
@@ -498,8 +504,27 @@ void Game::render() {
         if (auto* btn = dynamic_cast<Button*>(obj.get())) {
             btn->draw(window);
         }
-        if (auto* p = dynamic_cast<Player*>(obj.get())) {
-            p->getInventory().draw(window);
+        if (player){
+            Inventory& inv = player->getInventory();
+            if (inv.isVisible()) {
+                inv.draw(window);
+
+                sf::FloatRect invSize = inv.getGlobalBounds();
+                int hotbarX = invSize.left + invSize.width / 2 - 25 * 5; // assuming 10 slots, each 50px wide
+                int hotbarY = invSize.top + invSize.height + 10; // 10 pixels below the inventory
+
+                player->getHotbar().draw(window, hotbarX, hotbarY);
+            } else {
+            // hotbar always centered at bottom
+            int slotCount = player->getHotbar().getSlotCount();
+            int slotWidth = 50;
+            int spacing = 8;
+            int totalWidth = slotCount * slotWidth + (slotCount - 1) * spacing;
+            int hotbarX = window.getSize().x / 2 - totalWidth / 2;
+            int hotbarY = window.getSize().y - slotWidth - 50;
+
+            player->getHotbar().draw(window, hotbarX, hotbarY);
+            }
         }
     }
 

@@ -14,30 +14,50 @@ Inventory::Inventory(unsigned int cap) : capacity(cap) {
 }
 
 bool Inventory::addItem(const Item& item) {
-    if (item.isStackable()) {
-        for (auto& invItem : items) {
-            if (invItem.getName() == item.getName()) {
-                invItem.addQuantity(item.getQuantity());
-                return true;
-            }
+    int stackLimit = getStackLimit(item.getType());
+    int quantityToAdd = item.getQuantity();
+
+    // try stacking first
+    for (auto& invItem : items) {
+        if (invItem->getType() == item.getType() && invItem->getQuantity() < stackLimit) {
+            int space = stackLimit - invItem->getQuantity();
+            int add = std::min(space, quantityToAdd);
+            invItem->addQuantity(add);
+            quantityToAdd -= add;
+            if (quantityToAdd <= 0) return true;
         }
     }
-    if (items.size() < capacity) {
-        items.push_back(item);
-        return true;
-    } else {
-        std::cout << "Inventory full! Cannot add " << item.getName() << std::endl;
-        return false;
+    
+    // new slots if inventory not full
+    while (quantityToAdd > 0 && items.size() < capacity) {
+        int add = std::min(stackLimit, quantityToAdd);
+        items.push_back(std::make_unique<Item>(
+            item.getName(),
+            item.getType(),
+            add,
+            item.isStackable(),
+            item.getTexture(),
+            item.getPosition()
+        ));
+        quantityToAdd -= add;
     }
+
+    // if rest quantityToAdd > 0, inventory full
+    return quantityToAdd == 0;
 }
 
 bool Inventory::removeItem(const Type& type, int quantity) {
     for (auto it = items.begin(); it != items.end(); ++it) {
-        if (it->getType() == type) {
-            if (it->getQuantity() > quantity) {
-                it->addQuantity(-quantity);
+        if ((*it)->getType() == type) {
+            if ((*it)->getQuantity() > quantity) {
+                (*it)->addQuantity(-quantity);
                 return true;
-            } else if (it->getQuantity() == quantity) {
+            } else if ((*it)->getQuantity() == quantity) {
+                for (int h = 0; h < hotbar.getSlotCount(); ++h) {
+                    if (hotbar.getSlot(h) == it->get()) {
+                        hotbar.setSlot(h, nullptr);
+                    }
+                }
                 items.erase(it);
                 return true;
             } else {
@@ -50,8 +70,8 @@ bool Inventory::removeItem(const Type& type, int quantity) {
 
 Item* Inventory::getItem(const std::string& itemName) {
     for (auto& item : items) {
-        if (item.getName() == itemName) {
-            return &item;
+        if (item->getName() == itemName) {
+            return item.get();
         }
     }
     return nullptr;
@@ -75,19 +95,19 @@ void Inventory::draw(sf::RenderWindow& window) {
         itemBox.setOutlineThickness(1.f);
         window.draw(itemBox);
 
-        if (item.getTexture()) {
+        if (item->getTexture()) {
             sf::Sprite sprite;
-            sprite.setTexture(*item.getTexture());
+            sprite.setTexture(*item->getTexture());
             sprite.setPosition(x + 5.f, y + 5.f);
-            sprite.setScale((itemSize - 10.f) / item.getTexture()->getSize().x,
-                            (itemSize - 10.f) / item.getTexture()->getSize().y);
+            sprite.setScale((itemSize - 10.f) / item->getTexture()->getSize().x,
+                            (itemSize - 10.f) / item->getTexture()->getSize().y);
             window.draw(sprite);
         }
 
-        if (item.getQuantity() > 1) {
+        if (item->getQuantity() > 1) {
             sf::Text qtyText;
             qtyText.setFont(font);
-            qtyText.setString(std::to_string(item.getQuantity()));
+            qtyText.setString(std::to_string(item->getQuantity()));
             qtyText.setCharacterSize(14);
             qtyText.setFillColor(sf::Color::White);
             qtyText.setPosition(x + itemSize - 15.f, y + itemSize - 20.f);
@@ -105,11 +125,20 @@ void Inventory::draw(sf::RenderWindow& window) {
 int Inventory::getResourceQuantity(const Type& type) const {
     int total = 0;
     for (const auto& item : items) {
-        if (item.getType() == type) {
-            total += item.getQuantity();
+        if (item->getType() == type) {
+            total += item->getQuantity();
         }
     }
     return total;
+}
+
+unsigned int Inventory::getStackLimit(Type type) const {
+    // Tools not stackable, everything else stackable to 64
+    switch(type) {
+        // TODO cases where stack size is different for example tools
+        default:
+            return 64;
+    }
 }
 
 void Inventory::handleClick(const sf::Vector2f& mousePos) {

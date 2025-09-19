@@ -8,7 +8,9 @@ Tree::Tree(const sf::Vector2f& pos, const sf::Texture& treeTexture, const sf::Te
     respawnTimer(0.f), respawnTime(10.f) {
     sprite.setTexture(treeTexture);
     sprite.setPosition(position);
+    choppedSprite.setScale(3.f, 3.f);
     sprite.setOrigin(treeTexture.getSize().x / 2.0f, treeTexture.getSize().y); // Origin at bottom center
+    sprite.setScale(3.f, 3.f);
 
     choppedSprite.setTexture(choppedTexture);
     choppedSprite.setPosition(position);

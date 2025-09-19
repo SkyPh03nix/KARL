@@ -30,6 +30,7 @@ class Player : public GameObject {
         void setPosition(const sf::Vector2f& pos);
 
         Inventory& getInventory() { return inventory; }
+        Hotbar& getHotbar() { return inventory.hotbar; }
         sf::FloatRect getGlobalBounds() const;
         sf::Vector2f getPosition() const {return sprite.getPosition();}
 };
