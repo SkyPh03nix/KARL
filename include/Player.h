@@ -21,7 +21,7 @@ class Player : public GameObject {
         void initAnimationSet(sf::Texture& texture, const std::string& prefix, int frameCount, float frameTime, int directionsCount = 4);
 
     public:
-        Player(sf::Texture& walkTexture, sf::Texture& idleTexture, sf::Vector2f pos, float speed);
+        Player(sf::Texture& walkTexture, sf::Texture& idleTexture, sf::Vector2f pos, float speed, const sf::Vector2u& windowSize, unsigned int invCap = 64);
 
         void update(float deltaTime, const sf::RenderWindow& window) override;
         void draw(sf::RenderWindow& window) override;

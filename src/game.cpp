@@ -19,7 +19,9 @@ void Game::initObjects() {
         resources.getTexture("player_walk"),
         resources.getTexture("player_idle"),
         sf::Vector2f(window.getSize().x/2.f-32.f, window.getSize().y/2.f-32.f),
-        300.f
+        300.f,
+        window.getSize(), 
+        64
     );
     player = playerObj.get();
     gameObjects.push_back(std::move(playerObj));
@@ -503,8 +505,6 @@ void Game::render() {
         window.draw(r);
     }
 
-    
-
     // draw UI elements like inventory
     window.setView(uiView);
 
@@ -516,13 +516,9 @@ void Game::render() {
             Inventory& inv = player->getInventory();
             if (inv.isVisible()) {
                 inv.draw(window);
+            }
 
-                sf::FloatRect invSize = inv.getGlobalBounds();
-                int hotbarX = invSize.left + invSize.width / 2 - 25 * 5; // assuming 10 slots, each 50px wide
-                int hotbarY = invSize.top + invSize.height + 10; // 10 pixels below the inventory
-
-                player->getHotbar().draw(window, hotbarX, hotbarY);
-            } else {
+                   
             // hotbar always centered at bottom
             int slotCount = player->getHotbar().getSlotCount();
             int slotWidth = 50;
@@ -532,9 +528,8 @@ void Game::render() {
             int hotbarY = window.getSize().y - slotWidth - 50;
 
             player->getHotbar().draw(window, hotbarX, hotbarY);
-            }
         }
-    }
-
+    
+    } 
     window.display();
 }

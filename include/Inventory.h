@@ -10,7 +10,7 @@ class Inventory {
 public:
     Hotbar hotbar;
 
-    Inventory(unsigned int cap = 64);
+    Inventory(const sf::Vector2u& windowSize, unsigned int cap = 64);
 
     bool addItem(const Item& item);
     bool removeItem(const Type& type, int quantity);

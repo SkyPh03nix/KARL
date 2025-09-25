@@ -1,12 +1,16 @@
 #include "Inventory.h"
 #include <iostream>
 
-Inventory::Inventory(unsigned int cap) : capacity(cap) {
-    background.setSize(sf::Vector2f(400.f, 300.f));
+Inventory::Inventory(const sf::Vector2u& windowSize, unsigned int cap) : capacity(cap) {
+    sf::Vector2f invSize(600.f, 300.f);
+    background.setSize(invSize);
     background.setFillColor(sf::Color(50, 50, 50, 200));
     background.setOutlineColor(sf::Color(100,100,100));
     background.setOutlineThickness(2.f);
-    background.setPosition(50.f, 50.f);
+    background.setPosition(
+        windowSize.x / 2.f - invSize.x / 2.f,
+        windowSize.y / 2.f - invSize.y / 2.f
+    );
 
     if (!font.loadFromFile("assets/used/arial.ttf")) {
         std::cerr << "Failed to load font!" << std::endl;
@@ -83,7 +87,7 @@ void Inventory::draw(sf::RenderWindow& window) {
     window.draw(background);
 
     float padding = 10.f;
-    float itemSize = 50.f;
+    float itemSize = 64.f;
     float x = background.getPosition().x + padding;
     float y = background.getPosition().y + padding;
 

@@ -4,8 +4,9 @@
 #include <AnimationManager.h>
 
 
-Player::Player(sf::Texture& walkTexture,sf::Texture& idleTexture, sf::Vector2f pos, float speed)
-    : speed(speed){
+Player::Player(sf::Texture& walkTexture, sf::Texture& idleTexture, sf::Vector2f pos, float speed, const sf::Vector2u& windowSize, unsigned int invCap)
+    : speed(speed), inventory(windowSize, invCap)
+{
 
     // init animations
     initAnimationSet(walkTexture, "walk", 8, 0.1f, 4);
