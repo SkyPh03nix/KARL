@@ -34,8 +34,18 @@ void Hotbar::draw(sf::RenderWindow& window, float startX, float startY) {
             sf::Sprite sprite;
             if (slots[i]->getTexture()) {
                 sprite.setTexture(*slots[i]->getTexture());
-                sprite.setScale(slotSize / sprite.getLocalBounds().width, slotSize / sprite.getLocalBounds().height);
-                sprite.setPosition(slotRect.getPosition());
+
+               if (slots[i]->getType() == Type::SAPLING) {
+                    sprite.setTextureRect(sf::IntRect(0, 0, 128, 128));
+                    float scale = (slotSize / 128.f) * 3.f;
+                    sprite.setOrigin(128.f / 2.f, 128.f);
+                    sprite.setScale(scale, scale);
+                    sprite.setPosition(slotRect.getPosition().x + slotSize / 2.f, slotRect.getPosition().y + slotSize);
+                } else {
+                    sprite.setOrigin(0.f, 0.f);
+                    sprite.setScale(slotSize / sprite.getLocalBounds().width, slotSize / sprite.getLocalBounds().height);
+                    sprite.setPosition(slotRect.getPosition());
+                }
                 window.draw(sprite);
             }
 

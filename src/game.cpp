@@ -33,7 +33,7 @@ void Game::initTextures() {
     resources.loadTexture("tree", "assets/used/tree.png");
     resources.loadTexture("trunk", "assets/used/stump.png");
     resources.loadTexture("wood", "assets/used/wood.png");
-    resources.loadTexture("sapling", "assets/used/placeholder.png");
+    resources.loadTexture("sapling", "assets/used/sapling.png");
     resources.loadTexture("apple", "assets/used/placeholder2.png");
 }
 
@@ -379,6 +379,13 @@ void Game::update(float deltaTime) {
                 resources.getTexture("tree"),resources.getTexture("trunk"),resources.getTexture("wood"),resources.getTexture("sapling"),resources.getTexture("apple")
             ));
             it = saplings.erase(it);
+
+            // resort visibleTrees by y for correct rendering order
+            std::sort(visibleTrees.begin(), visibleTrees.end(), [](const std::unique_ptr<Tree>& a, const std::unique_ptr<Tree>& b) {
+                sf::Vector2f posA = a->getPosition();
+                sf::Vector2f posB = b->getPosition();
+                return (posA.y < posB.y) || (posA.y == posB.y && posA.x < posB.x);
+            });
         } else {
             ++it;
         }
@@ -484,6 +491,7 @@ void Game::render() {
         r.setFillColor(sf::Color(0, 0, 255, 100));              //debug
         window.draw(r);                                         //debug
     }
+    for (auto& sapling : saplings) sapling->draw(window);
 
     for (const auto& tree : visibleTrees) {
         tree->draw(window);
@@ -495,7 +503,7 @@ void Game::render() {
         window.draw(r);
     }
 
-    for (auto& sapling : saplings) sapling->draw(window);
+    
 
     // draw UI elements like inventory
     window.setView(uiView);

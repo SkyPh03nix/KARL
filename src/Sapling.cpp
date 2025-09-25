@@ -29,9 +29,8 @@ void Sapling::setGrowthState(int state) {
 }
 
 void Sapling::updateSprite() {
-    // Angenommen: 3 States nebeneinander im Sheet, alle gleich groß
-    int frameWidth = spritesheet.getSize().x / 3;
-    int frameHeight = spritesheet.getSize().y;
-    int frame = std::min(growthState, 2); // 0,1,2 (3 ist "fertig")
-    sprite.setTextureRect(sf::IntRect(frame * frameWidth, 0, frameWidth, frameHeight));
+    int textureSize = 128;
+    int frame = std::min(growthState, 2);
+    sprite.setTextureRect(sf::IntRect(frame * textureSize, 0, textureSize, textureSize));
+    sprite.setScale(3.f, 3.f); 
 }

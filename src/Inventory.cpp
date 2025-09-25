@@ -98,9 +98,20 @@ void Inventory::draw(sf::RenderWindow& window) {
         if (item->getTexture()) {
             sf::Sprite sprite;
             sprite.setTexture(*item->getTexture());
-            sprite.setPosition(x + 5.f, y + 5.f);
-            sprite.setScale((itemSize - 10.f) / item->getTexture()->getSize().x,
-                            (itemSize - 10.f) / item->getTexture()->getSize().y);
+
+             if (item->getType() == Type::SAPLING) {
+                sprite.setTextureRect(sf::IntRect(0, 0, 128, 128));
+                
+                float scale = ((itemSize - 10.f) / 128.f) * 3.f;
+                sprite.setScale(scale, scale);
+                sprite.setOrigin(128.f / 2.f, 128.f); 
+                sprite.setPosition(x + itemSize / 2.f, y + itemSize); 
+            } else {
+                sprite.setScale((itemSize - 10.f) / item->getTexture()->getSize().x,
+                                (itemSize - 10.f) / item->getTexture()->getSize().y);
+                sprite.setOrigin(0.f, 0.f); 
+                sprite.setPosition(x + 5.f, y + 5.f);
+            }
             window.draw(sprite);
         }
 
